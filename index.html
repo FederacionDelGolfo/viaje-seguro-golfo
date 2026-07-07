@@ -15,7 +15,11 @@
         input, button {padding:12px; margin:8px 0; width:100%; border-radius:8px; font-size:16px;}
         button {background:#4a6cf7; color:white; border:none; cursor:pointer;}
         button.success {background:#28a745;}
-        .participant {padding:15px; background:#f8f9fa; margin:10px 0; border-radius:10px;}
+        .participant {padding:15px; background:#f8f9fa; margin:10px 0; border-radius:10px; display:flex; justify-content:space-between; align-items:center;}
+        .status {padding:5px 12px; border-radius:20px; font-size:14px; font-weight:bold;}
+        .verde {background:#d4edda; color:#155724;}
+        .rojo {background:#f8d7da; color:#721c24;}
+        .distrito-header {background:#e3f2fd; padding:12px; margin:15px 0 10px; border-radius:8px; font-weight:bold; color:#1e4a8c;}
     </style>
 </head>
 <body>
@@ -30,94 +34,23 @@
             <div class="tab" onclick="showTab(2)">Lista</div>
         </div>
 
+        <!-- Registro -->
         <div id="tab0" class="card">
-            <h2>Registro</h2>
+            <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="Nombre completo">
             <input type="tel" id="telefono" placeholder="Teléfono">
-            <input type="text" id="distrito" placeholder="Distrito">
+            <input type="text" id="distrito" placeholder="Distrito (ej: Coyoacán)">
             <button onclick="registrar()" class="success">Registrarme</button>
         </div>
 
+        <!-- Check-in -->
         <div id="tab1" class="card" style="display:none">
             <h2>Check-in</h2>
             <input type="text" id="codigo" placeholder="Código de 4 dígitos" maxlength="4">
             <button onclick="hacerCheckin()" class="success">Confirmar Asistencia</button>
         </div>
 
+        <!-- Lista -->
         <div id="tab2" class="card" style="display:none">
-            <h2>Lista de Asistentes</h2>
-            <input type="password" id="pass" placeholder="Contraseña">
-            <button onclick="verLista()">Ver Lista</button>
-            <div id="lista" style="margin-top:20px;"></div>
-            <button onclick="exportar()" class="success" style="margin-top:10px">Exportar Excel</button>
-        </div>
-    </div>
-
-    <script>
-        let data = JSON.parse(localStorage.getItem('viajeFG')) || [];
-
-        function showTab(n) {
-            document.querySelectorAll('.card').forEach((c, i) => c.style.display = i === n ? 'block' : 'none');
-            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
-        }
-
-        function registrar() {
-            const nombre = document.getElementById('nombre').value.trim();
-            const telefono = document.getElementById('telefono').value.trim();
-            const distrito = document.getElementById('distrito').value.trim();
-            if (!nombre || !distrito) return alert("Nombre y Distrito son obligatorios");
-
-            const codigo = Math.floor(1000 + Math.random() * 9000);
-
-            data.push({nombre, telefono: telefono || "-", distrito, codigo, checkin: false, checkinFecha: null, fechaRegistro: new Date().toLocaleString()});
-            localStorage.setItem('viajeFG', JSON.stringify(data));
-            alert(`Registro exitoso!\nCódigo: ${codigo}`);
-            document.getElementById('nombre').value = '';
-            document.getElementById('telefono').value = '';
-            document.getElementById('distrito').value = '';
-        }
-
-        function hacerCheckin() {
-            const codigo = document.getElementById('codigo').value.trim();
-            const persona = data.find(p => p.codigo == codigo);
-            if (persona) {
-                persona.checkin = true;
-                persona.checkinFecha = new Date().toLocaleString();
-                localStorage.setItem('viajeFG', JSON.stringify(data));
-                alert(`✅ Check-in de ${persona.nombre}`);
-            } else alert("Código inválido");
-        }
-
-        function verLista() {
-            if (document.getElementById('pass').value !== "federacion2026") return alert("Contraseña incorrecta");
-
-            const container = document.getElementById('lista');
-            let html = `<p>Total: ${data.length}</p>`;
-            data.forEach(p => {
-                html += `<div class="participant">
-                    <strong>${p.nombre}</strong> - ${p.distrito}<br>
-                    Tel: ${p.telefono} | Código: ${p.codigo}<br>
-                    ${p.checkin ? `Check-in: ${p.checkinFecha}` : 'Pendiente'}
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        function exportar() {
-            let csv = "Nombre,Distrito,Teléfono,Código,Check-in,Fecha_Checkin,Fecha_Registro\n";
-            data.forEach(p => {
-                csv += `"\( {p.nombre}"," \){p.distrito}","\( {p.telefono}"," \){p.codigo}","\( {p.checkin ? 'Sí' : 'No'}"," \){p.checkinFecha || ''}","${p.fechaRegistro}"\n`;
-            });
-            const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csv);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "asistentes_viaje.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        showTab(0);
-    </script>
-</body>
-</html>
+            <h2>Lista de Asistentes por Distrito</h2>
+            <input type="password" id="pass" placeholder="Contraseña
