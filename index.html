@@ -7,13 +7,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Paleta de colores vibrante y juvenil */
-            --primary-bg: #10121a; /* Fondo oscuro moderno */
-            --container-bg: #1a1e29; /* Fondo de contenedor más suave */
-            --primary-accent: #6c5ce7; /* Púrpura eléctrico */
-            --secondary-accent: #00cec9; /* Cian brillante */
-            --success-color: #00b894; /* Verde esmeralda */
-            --error-color: #ff7675; /* Rojo suave */
+            --primary-bg: #10121a;
+            --container-bg: #1a1e29;
+            --primary-accent: #6c5ce7;
+            --secondary-accent: #00cec9;
+            --success-color: #00b894;
+            --error-color: #ff7675;
             --text-main: #ecf0f1;
             --text-muted: #b0bec5;
             --font-main: 'Inter', sans-serif;
@@ -38,7 +37,7 @@
 
         .container {
             width: 100%;
-            max-width: 700px;
+            max-width: 750px;
             background-color: var(--container-bg);
             border-radius: var(--radius-main);
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
@@ -59,10 +58,6 @@
             font-size: 28px;
             font-weight: 700;
             letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
 
         .tabs {
@@ -96,7 +91,6 @@
             box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
         }
 
-        /* Corrección de visualización en las Cards */
         .card {
             padding: 35px 30px;
             display: none; 
@@ -108,7 +102,6 @@
             font-size: 22px;
             font-weight: 600;
             color: var(--text-main);
-            letter-spacing: -0.3px;
         }
 
         input {
@@ -121,18 +114,13 @@
             background-color: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
             color: var(--text-main);
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        input::placeholder {
-            color: var(--text-muted);
+            transition: border-color 0.2s;
         }
 
         input:focus {
             outline: none;
             border-color: var(--primary-accent);
             box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
-            background-color: rgba(255,255,255,0.08);
         }
 
         button {
@@ -149,38 +137,41 @@
             letter-spacing: 0.5px;
         }
 
-        button.primary {
-            background-color: var(--primary-accent);
-            color: white;
+        button.primary { background-color: var(--primary-accent); color: white; }
+        button.primary:hover { background-color: #5b4bc4; }
+        button.success { background-color: var(--success-color); color: white; }
+        button.success:hover { background-color: #00a383; }
+        button.secondary { background-color: transparent; color: var(--primary-accent); border: 2px solid var(--primary-accent); margin-top: 15px;}
+
+        /* Sub-pestañas de Distritos */
+        .distritos-tabs-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        button.primary:hover {
-            background-color: #5b4bc4;
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+        .distrito-tab {
+            padding: 8px 14px;
+            background-color: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        button.success {
-            background-color: var(--success-color);
-            color: white;
+        .distrito-tab.active {
+            background-color: var(--secondary-accent);
+            color: #10121a;
+            font-weight: 700;
         }
 
-        button.success:hover {
-            background-color: #00a383;
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4);
-        }
-
-        button.secondary {
-            background-color: transparent;
-            color: var(--primary-accent);
-            border: 2px solid var(--primary-accent);
-            margin-top: 10px;
-        }
-
-        button.secondary:hover {
-            background-color: rgba(108, 92, 231, 0.1);
-        }
+        .distrito-panel { display: none; }
+        .distrito-panel.active { display: block; animation: fadeIn 0.3s ease; }
 
         .participant {
             padding: 18px;
@@ -193,56 +184,19 @@
             border: 1px solid rgba(255,255,255,0.03);
         }
 
-        .participant strong {
-            font-size: 17px;
-            color: var(--text-main);
-        }
+        .participant strong { font-size: 16px; color: var(--text-main); }
+        .participant-info-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .status { padding: 8px 14px; border-radius: 30px; font-weight: 700; font-size: 12px; }
+        
+        .verde .status { background-color: rgba(0, 184, 148, 0.15); color: var(--success-color); }
+        .rojo .status { background-color: rgba(255, 118, 117, 0.15); color: var(--error-color); }
 
-        .participant-info-sub {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
+        .time-badge { font-size: 11px; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #fff;}
 
-        .status {
-            padding: 8px 16px;
-            border-radius: 30px;
-            font-weight: 700;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .verde .status {
-            background-color: rgba(0, 184, 148, 0.15);
-            color: var(--success-color);
-        }
-
-        .rojo .status {
-            background-color: rgba(255, 118, 117, 0.15);
-            color: var(--error-color);
-        }
-
-        .distrito-header {
-            background-color: rgba(0, 206, 201, 0.1);
-            color: var(--secondary-accent);
-            padding: 12px 18px;
-            margin: 25px 0 15px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 15px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         @media (max-width: 600px) {
-            body { padding: 10px; }
-            header { padding: 20px 15px; }
-            header h1 { font-size: 22px; }
-            .tabs { padding: 10px; gap: 3px; }
-            .tab { padding: 10px; font-size: 14px; }
-            .card { padding: 25px 20px; }
-            .participant { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .participant { flex-direction: column; align-items: flex-start; gap: 12px; }
             .status { align-self: flex-end; }
         }
     </style>
@@ -261,15 +215,15 @@
 
         <div id="tab0" class="card">
             <h2>Registro de Asistente</h2>
-            <input type="text" id="nombre" placeholder="Nombre completo">
+            <input type="text" id="nombre" placeholder="NOMBRE COMPLETO" oninput="this.value = this.value.toUpperCase()">
             <input type="tel" id="telefono" placeholder="Teléfono (opcional)">
-            <input type="text" id="distrito" placeholder="Distrito">
+            <input type="text" id="distrito" placeholder="DISTRITO" oninput="this.value = this.value.toUpperCase()">
             <button onclick="registrar()" class="success">Registrarme</button>
         </div>
 
         <div id="tab1" class="card">
             <h2>Check-in de Asistencia</h2>
-            <input type="text" id="codigo" placeholder="Introduce tu código de 4 dígitos" maxlength="4" style="text-align: center; letter-spacing: 5px; font-weight: bold; font-size: 20px;">
+            <input type="text" id="codigo" placeholder="CÓDIGO" maxlength="4" style="text-align: center; letter-spacing: 5px; font-weight: bold; font-size: 20px;">
             <button onclick="hacerCheckin()" class="primary">Confirmar Mi Asistencia</button>
         </div>
 
@@ -277,8 +231,11 @@
             <h2>Lista de Participantes</h2>
             <input type="password" id="pass" placeholder="Contraseña de acceso">
             <button onclick="verLista()" class="primary">Ver Lista</button>
+            
             <div id="lista_container" style="margin-top:20px; display: none;">
-                <div id="lista"></div>
+                <div id="distritos_tabs" class="distritos-tabs-container"></div>
+                <div id="distritos_paneles"></div>
+                
                 <button onclick="exportar()" class="secondary">Exportar a CSV (Excel)</button>
             </div>
         </div>
@@ -287,27 +244,20 @@
     <script>
         let data = JSON.parse(localStorage.getItem('viajeFG')) || [];
 
-        // Función corregida para alternar pestañas usando .style.display de forma limpia
         function showTab(n) {
             const cards = document.querySelectorAll('.card');
             const tabs = document.querySelectorAll('.tab');
-
-            cards.forEach((c, i) => {
-                c.style.display = (i === n) ? 'block' : 'none';
-            });
-            
-            tabs.forEach((t, i) => {
-                t.classList.toggle('active', i === n);
-            });
+            cards.forEach((c, i) => c.style.display = (i === n) ? 'block' : 'none');
+            tabs.forEach((t, i) => t.classList.toggle('active', i === n));
         }
 
         function registrar() {
-            const nombre = document.getElementById('nombre').value.trim();
+            const nombre = document.getElementById('nombre').value.trim().toUpperCase();
             const telefono = document.getElementById('telefono').value.trim();
-            const distrito = document.getElementById('distrito').value.trim();
+            const distrito = document.getElementById('distrito').value.trim().toUpperCase();
 
             if (!nombre || !distrito) {
-                alert("⚠️ Por favor, rellena al menos Nombre y Distrito.");
+                alert("⚠️ Por favor, rellena Nombre y Distrito.");
                 return;
             }
 
@@ -320,11 +270,11 @@
                 codigo, 
                 checkin: false, 
                 checkinFecha: null, 
-                fechaRegistro: new Date().toLocaleString()
+                fechaRegistro: new Date().toLocaleString('es-MX')
             });
             localStorage.setItem('viajeFG', JSON.stringify(data));
 
-            alert(`✅ ¡Registro exitoso, ${nombre}!\nTu código de check-in es: ${codigo}`);
+            alert(`✅ ¡Registro exitoso!\nCódigo asignado: ${codigo}`);
             
             document.getElementById('nombre').value = '';
             document.getElementById('telefono').value = '';
@@ -337,62 +287,90 @@
 
             if (persona) {
                 if (persona.checkin) {
-                    alert(`ℹ️ ${persona.nombre}, ya has confirmado tu asistencia anteriormente.`);
+                    alert(`ℹ️ ${persona.nombre} ya realizó el check-in.`);
                 } else {
+                    const ahora = new Date();
                     persona.checkin = true;
-                    persona.checkinFecha = new Date().toLocaleString();
+                    // Guardamos la fecha y hora legible de manera explícita
+                    persona.checkinFecha = ahora.toLocaleDateString('es-MX') + ' ' + ahora.toLocaleTimeString('es-MX');
                     localStorage.setItem('viajeFG', JSON.stringify(data));
-                    alert(`🎉 ✅ ¡Check-in confirmado para ${persona.nombre}! ¡Buen viaje!`);
+                    alert(`🎉 ✅ Check-in completado a las ${ahora.toLocaleTimeString('es-MX')} para ${persona.nombre}`);
                 }
                 document.getElementById('codigo').value = '';
             } else {
-                alert("❌ Código incorrecto. Por favor, revísalo.");
+                alert("❌ Código incorrecto.");
             }
         }
 
         function verLista() {
             const pass = document.getElementById('pass').value;
-            // Contraseña fija: federacion2026
             if (pass !== "federacion2026") {
                 alert("❌ Contraseña incorrecta.");
                 document.getElementById('lista_container').style.display = 'none';
                 return;
             }
 
-            const container = document.getElementById('lista');
-            const mainContainer = document.getElementById('lista_container');
-            mainContainer.style.display = 'block';
+            const tabsContainer = document.getElementById('distritos_tabs');
+            const panelesContainer = document.getElementById('distritos_paneles');
+            document.getElementById('lista_container').style.display = 'block';
 
             if (data.length === 0) {
-                container.innerHTML = "<p>No hay registros todavía.</p>";
+                tabsContainer.innerHTML = "";
+                panelesContainer.innerHTML = "<p>No hay registros todavía.</p>";
                 return;
             }
 
-            let html = `<p><strong>Total: ${data.length} participantes registrados</strong></p>`;
-
+            // Agrupar por distrito
             const porDistrito = {};
             data.forEach(p => {
                 if (!porDistrito[p.distrito]) porDistrito[p.distrito] = [];
                 porDistrito[p.distrito].push(p);
             });
 
-            Object.keys(porDistrito).sort().forEach(dist => {
-                html += `<div class="distrito-header">${dist} (${porDistrito[dist].length})</div>`;
+            const distritosOrdenados = Object.keys(porDistrito).sort();
+            
+            let tabsHtml = "";
+            let panelesHtml = "";
+
+            distritosOrdenados.forEach((dist, index) => {
+                const isActive = index === 0 ? 'active' : '';
+                
+                // 1. Crear Pestaña del Distrito
+                tabsHtml += `<div class="distrito-tab ${isActive}" onclick="showDistritoTab('${dist}')" id="tab-link-${dist}">${dist} (${porDistrito[dist].length})</div>`;
+                
+                // 2. Crear Panel de Alumnos del Distrito
+                panelesHtml += `<div class="distrito-panel ${isActive}" id="panel-dist-${dist}">`;
+                
                 porDistrito[dist].forEach(p => {
-                    html += `
+                    // Extraer solo la sección de la hora si ya hizo Check-in para diseño estético
+                    const horaCheckin = p.checkin ? p.checkinFecha.split(' ')[1] : '';
+
+                    panelesHtml += `
                         <div class="participant ${p.checkin ? 'verde' : 'rojo'}">
                             <div class="participant-info">
                                 <strong>${p.nombre}</strong>
                                 <div class="participant-info-sub">Tel: ${p.telefono} | Cód: ${p.codigo}</div>
                             </div>
                             <div class="status">
-                                ${p.checkin ? '✅ Presente' : '❌ Pendiente'}
+                                ${p.checkin ? `✅ LISTO <span class="time-badge">${horaCheckin}</span>` : '❌ PENDIENTE'}
                             </div>
                         </div>`;
                 });
+                
+                panelesHtml += `</div>`;
             });
 
-            container.innerHTML = html;
+            tabsContainer.innerHTML = tabsHtml;
+            panelesContainer.innerHTML = panelesHtml;
+        }
+
+        // Cambiar entre sub-pestañas de distritos
+        function showDistritoTab(distritoSeleccionado) {
+            document.querySelectorAll('.distrito-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.distrito-tab').forEach(tab => tab.classList.remove('active'));
+
+            document.getElementById(`panel-dist-${distritoSeleccionado}`).classList.add('active');
+            document.getElementById(`tab-link-${distritoSeleccionado}`).classList.add('active');
         }
 
         function exportar() {
@@ -401,7 +379,7 @@
                 return;
             }
 
-            let csv = "\uFEFFNombre,Distrito,Telefono,Codigo,Checkin,Fecha Checkin,Fecha Registro\n";
+            let csv = "\uFEFFNombre,Distrito,Telefono,Codigo,Checkin,Fecha_Hora_Checkin,Fecha_Registro\n";
             data.forEach(p => {
                 csv += `"${p.nombre}","${p.distrito}","${p.telefono}","${p.codigo}","${p.checkin ? 'Si' : 'No'}","${p.checkinFecha || ''}","${p.fechaRegistro}"\n`;
             });
@@ -417,7 +395,6 @@
             document.body.removeChild(link);
         }
 
-        // Inicialización obligatoria
         showTab(0);
     </script>
 </body>
