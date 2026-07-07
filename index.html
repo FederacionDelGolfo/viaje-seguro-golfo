@@ -1,395 +1,352 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Viaje Seguro - Federación del Golfo</title>
-<!-- Google Fonts: Inter para un look moderno -->
-<link href="[https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap)" rel="stylesheet">
-<style>
-:root {
-/* Paleta de colores vibrante y juvenil */
---primary-bg: #10121a; /* Fondo oscuro moderno */
---container-bg: #1a1e29; /* Fondo de contenedor más suave */
---primary-accent: #6c5ce7; /* Púrpura eléctrico */
---secondary-accent: #00cec9; /* Cian brillante */
---success-color: #00b894; /* Verde esmeralda */
---error-color: #ff7675; /* Rojo suave */
---text-main: #ecf0f1;
---text-muted: #b0bec5;
---font-main: 'Inter', sans-serif;
---radius-main: 16px;
---radius-tab: 10px;
-}
-body {
-font-family: var(--font-main);
-margin: 0;
-padding: 20px;
-background-color: var(--primary-bg);
-/* Patrón sutil de fondo para textura moderna */
-background-image:
-radial-gradient(at 10% 10%, rgba(108, 92, 231, 0.15) 0px, transparent 50%),
-radial-gradient(at 90% 90%, rgba(0, 206, 201, 0.1) 0px, transparent 50%);
-color: var(--text-main);
-min-height: 100vh;
-display: flex;
-justify-content: center;
-align-items: center;
-}
-.container {
-width: 100%;
-max-width: 700px;
-background-color: var(--container-bg);
-border-radius: var(--radius-main);
-box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-overflow: hidden;
-border: 1px solid rgba(255,255,255,0.05);
-}
-header {
-background-color: rgba(108, 92, 231, 0.1);
-color: var(--primary-accent);
-padding: 30px 20px;
-text-align: center;
-border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-header h1 {
-margin: 0;
-font-size: 28px;
-font-weight: 700;
-letter-spacing: -0.5px;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 10px;
-}
-header h1::before {
-content: '🚍';
-font-size: 32px;
-}
-.tabs {
-display: flex;
-gap: 5px;
-padding: 15px;
-background-color: rgba(255,255,255,0.02);
-border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-.tab {
-flex: 1;
-padding: 12px;
-text-align: center;
-cursor: pointer;
-font-weight: 600;
-font-size: 15px;
-color: var(--text-muted);
-border-radius: var(--radius-tab);
-transition: all 0.2s ease;
-}
-.tab:hover {
-background-color: rgba(255,255,255,0.05);
-color: var(--text-main);
-}
-.tab.active {
-background-color: var(--primary-accent);
-color: white;
-box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
-}
-.card {
-padding: 35px 30px;
-display: none;
-}
-.card.active {
-display: block;
-animation: fadeIn 0.4s ease;
-}
-@keyframes fadeIn {
-from { opacity: 0; transform: translateY(10px); }
-to { opacity: 1; transform: translateY(0); }
-}
-h2 {
-margin-top: 0;
-margin-bottom: 25px;
-font-size: 22px;
-font-weight: 600;
-color: var(--text-main);
-letter-spacing: -0.3px;
-}
-/* Estilo para los campos de entrada */
-input {
-padding: 16px;
-margin: 10px 0;
-width: 100%;
-border-radius: 10px;
-font-size: 16px;
-box-sizing: border-box;
-background-color: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,255,255,0.1);
-color: var(--text-main);
-transition: border-color 0.2s, box-shadow 0.2s;
-}
-input::placeholder {
-color: var(--text-muted);
-}
-input:focus {
-outline: none;
-border-color: var(--primary-accent);
-box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
-background-color: rgba(255,255,255,0.08);
-}
-/* Estilo para botones */
-button {
-padding: 16px;
-margin: 20px 0 10px;
-width: 100%;
-border-radius: 10px;
-font-size: 16px;
-font-weight: 700;
-border: none;
-cursor: pointer;
-transition: all 0.2s ease;
-text-transform: uppercase;
-letter-spacing: 0.5px;
-}
-button.primary {
-background-color: var(--primary-accent);
-color: white;
-}
-button.primary:hover {
-background-color: #5b4bc4;
-transform: translateY(-1px);
-box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
-}
-button.success {
-background-color: var(--success-color);
-color: white;
-}
-button.success:hover {
-background-color: #00a383;
-transform: translateY(-1px);
-box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4);
-}
-/* Botón secundario para la lista */
-button.secondary {
-background-color: transparent;
-color: var(--primary-accent);
-border: 2px solid var(--primary-accent);
-margin-top: 10px;
-}
-button.secondary:hover {
-background-color: rgba(108, 92, 231, 0.1);
-}
-/* Estilos de la lista de participantes */
-#lista p {
-color: var(--text-muted);
-font-size: 15px;
-}
-.participant {
-padding: 18px;
-background-color: rgba(255,255,255,0.03);
-margin: 12px 0;
-border-radius: 12px;
-display: flex;
-justify-content: space-between;
-align-items: center;
-border: 1px solid rgba(255,255,255,0.03);
-transition: background-color 0.2s;
-}
-.participant:hover {
-background-color: rgba(255,255,255,0.05);
-}
-.participant strong {
-font-size: 17px;
-color: var(--text-main);
-}
-.participant-info-sub {
-font-size: 14px;
-color: var(--text-muted);
-margin-top: 4px;
-}
-.status {
-padding: 8px 16px;
-border-radius: 30px;
-font-weight: 700;
-font-size: 13px;
-text-transform: uppercase;
-letter-spacing: 0.5px;
-display: flex;
-align-items: center;
-gap: 6px;
-}
-.verde {
-background-color: rgba(0, 184, 148, 0.15);
-color: var(--success-color);
-}
-.rojo {
-background-color: rgba(255, 118, 117, 0.15);
-color: var(--error-color);
-}
-.distrito-header {
-background-color: rgba(0, 206, 201, 0.1);
-color: var(--secondary-accent);
-padding: 12px 18px;
-margin: 25px 0 15px;
-border-radius: 8px;
-font-weight: 700;
-font-size: 15px;
-letter-spacing: 0.5px;
-text-transform: uppercase;
-}
-/* Responsive */
-@media (max-width: 600px) {
-body { padding: 10px; }
-header { padding: 20px 15px; }
-header h1 { font-size: 22px; }
-.tabs { padding: 10px; gap: 3px; }
-.tab { padding: 10px; font-size: 14px; }
-.card { padding: 25px 20px; }
-.participant { flex-direction: column; align-items: flex-start; gap: 15px; }
-.status { align-self: flex-end; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viaje Seguro - Federación del Golfo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Paleta de colores vibrante y juvenil */
+            --primary-bg: #10121a; /* Fondo oscuro moderno */
+            --container-bg: #1a1e29; /* Fondo de contenedor más suave */
+            --primary-accent: #6c5ce7; /* Púrpura eléctrico */
+            --secondary-accent: #00cec9; /* Cian brillante */
+            --success-color: #00b894; /* Verde esmeralda */
+            --error-color: #ff7675; /* Rojo suave */
+            --text-main: #ecf0f1;
+            --text-muted: #b0bec5;
+            --font-main: 'Inter', sans-serif;
+            --radius-main: 16px;
+            --radius-tab: 10px;
+        }
+
+        body {
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 20px;
+            background-color: var(--primary-bg);
+            /* Patrón sutil de fondo para textura moderna */
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(108, 92, 231, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(0, 206, 201, 0.1) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background-color: var(--container-bg);
+            border-radius: var(--radius-main);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        header {
+            background-color: rgba(108, 92, 231, 0.1);
+            color: var(--primary-accent);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            padding: 15px;
+            background-color: rgba(255,255,255,0.02);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-muted);
+            border-radius: var(--radius-tab);
+            transition: all 0.2s ease;
+        }
+
+        .tab:hover {
+            background-color: rgba(255,255,255,0.05);
+            color: var(--text-main);
+        }
+
+        .tab.active {
+            background-color: var(--primary-accent);
+            color: white;
+            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
+        }
+
+        .card {
+            padding: 35px 30px;
+            display: none;
+        }
+
+        .card.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-main);
+            letter-spacing: -0.3px;
+        }
+
+        /* Estilo para los campos de entrada */
+        input {
+            padding: 16px;
+            margin: 10px 0;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-main);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+            background-color: rgba(255,255,255,0.08);
+        }
+
+        /* Estilo para botones */
+        button {
+            padding: 16px;
+            margin: 20px 0 10px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button.primary {
+            background-color: var(--primary-accent);
+            color: white;
+        }
+
+        button.primary:hover {
+            background-color: #5b4bc4;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        button.success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        button.success:hover {
+            background-color: #00a383;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4);
+        }
+
+        /* Botón secundario para la lista */
+        button.secondary {
+            background-color: transparent;
+            color: var(--primary-accent);
+            border: 2px solid var(--primary-accent);
+            margin-top: 10px;
+        }
+
+        button.secondary:hover {
+            background-color: rgba(108, 92, 231, 0.1);
+        }
+
+        /* Estilos de la lista de participantes */
+        #lista p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        .participant {
+            padding: 18px;
+            background-color: rgba(255,255,255,0.03);
+            margin: 12px 0;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.03);
+            transition: background-color 0.2s;
+        }
+
+        .participant:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        .participant strong {
+            font-size: 17px;
+            color: var(--text-main);
+        }
+
+        .participant-info-sub {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .status {
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .verde {
+            background-color: rgba(0, 184, 148, 0.15);
+            color: var(--success-color);
+        }
+
+        .rojo {
+            background-color: rgba(255, 118, 117, 0.15);
+            color: var(--error-color);
+        }
+
+        .distrito-header {
+            background-color: rgba(0, 206, 201, 0.1);
+            color: var(--secondary-accent);
+            padding: 12px 18px;
+            margin: 25px 0 15px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            header { padding: 20px 15px; }
+            header h1 { font-size: 22px; }
+            .tabs { padding: 10px; gap: 3px; }
+            .tab { padding: 10px; font-size: 14px; }
+            .card { padding: 25px 20px; }
+            .participant { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .status { align-self: flex-end; }
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-<header>
-<h1>Viaje Seguro - Federación del Golfo</h1>
-</header>
-<div class="tabs">
-<div class="tab active" onclick="showTab(0)">Registro</div>
-<div class="tab" onclick="showTab(1)">Check-in</div>
-<div class="tab" onclick="showTab(2)">Lista</div>
-</div>
-<div id="tab0" class="card active">
-<h2>Registro de Asistente</h2>
-<input type="text" id="nombre" placeholder="Nombre completo">
-<input type="tel" id="telefono" placeholder="Teléfono (opcional)">
-<input type="text" id="distrito" placeholder="Distrito">
-<button onclick="registrar()" class="success">Registrarme</button>
-</div>
-<div id="tab1" class="card">
-<h2>Check-in de Asistencia</h2>
-<input type="text" id="codigo" placeholder="Introduce tu código de 4 dígitos" maxlength="4" style="text-align: center; letter-spacing: 5px; font-weight: bold; font-size: 20px;">
-<button onclick="hacerCheckin()" class="primary">Confirmar Mi Asistencia</button>
-</div>
-<div id="tab2" class="card">
-<h2>Lista de Participantes</h2>
-<input type="password" id="pass" placeholder="Contraseña de acceso">
-<button onclick="verLista()" class="primary">Ver Lista</button>
-<div id="lista_container" style="margin-top:20px; display: none;">
-<div id="lista"></div>
-<button onclick="exportar()" class="secondary">Exportar a CSV (Excel)</button>
-</div>
-</div>
-</div>
-<script>
-// Almacenamiento local
-let data = JSON.parse(localStorage.getItem('viajeFG')) || [];
-// Función para cambiar de pestaña
-function showTab(n) {
-const cards = document.querySelectorAll('.card');
-const tabs = document.querySelectorAll('.tab');
-cards.forEach((c, i) => c.classList.toggle('active', i === n));
-tabs.forEach((t, i) => t.classList.toggle('active', i === n));
-}
-// Función de Registro
-function registrar() {
-const nombre = document.getElementById('nombre').value.trim();
-const telefono = document.getElementById('telefono').value.trim();
-const distrito = document.getElementById('distrito').value.trim();
-if (!nombre || !distrito) {
-alert("⚠️ Por favor, rellena al menos Nombre y Distrito.");
-return;
-}
-// Generar código aleatorio de 4 dígitos
-const codigo = Math.floor(1000 + Math.random() * 9000);
-// Guardar datos
-data.push({
-nombre,
-telefono: telefono || "-",
-distrito,
-codigo,
-checkin: false,
-checkinFecha: null,
-fechaRegistro: new Date().toLocaleString()
-});
-localStorage.setItem('viajeFG', JSON.stringify(data));
-alert(✅ ¡Registro exitoso, ${nombre}!\nTu código de check-in es: ${codigo}\n\n¡No lo olvides!);
-// Limpiar campos
-document.getElementById('nombre').value = '';
-document.getElementById('telefono').value = '';
-document.getElementById('distrito').value = '';
-}
-// Función de Check-in
-function hacerCheckin() {
-const codigoInput = document.getElementById('codigo').value.trim();
-const persona = data.find(p => p.codigo == codigoInput);
-if (persona) {
-if (persona.checkin) {
-alert(ℹ️ ${persona.nombre}, ya has confirmado tu asistencia anteriormente.);
-} else {
-persona.checkin = true;
-persona.checkinFecha = new Date().toLocaleString();
-localStorage.setItem('viajeFG', JSON.stringify(data));
-alert(🎉 ✅ ¡Check-in confirmado para ${persona.nombre}! ¡Buen viaje!);
-}
-document.getElementById('codigo').value = '';
-} else {
-alert("❌ Código incorrecto. Por favor, revísalo.");
-}
-}
-// Función para visualizar la lista (con contraseña simplificada)
-function verLista() {
-const pass = document.getElementById('pass').value;
-// Contraseña de ejemplo: federacion2026
-if (pass !== "federacion2026") {
-alert("❌ Contraseña incorrecta.");
-document.getElementById('lista_container').style.display = 'none';
-return;
-}
-const container = document.getElementById('lista');
-const mainContainer = document.getElementById('lista_container');
-mainContainer.style.display = 'block';
-if (data.length === 0) {
-container.innerHTML = "<p>No hay registros todavía.</p>";
-return;
-}
-let html = <p><strong>Total: ${data.length} participantes registrados</strong></p>;
-// Agrupar por distrito
-const porDistrito = {};
-data.forEach(p => {
-if (!porDistrito[p.distrito]) porDistrito[p.distrito] = [];
-porDistrito[p.distrito].push(p);
-});
-// Ordenar distritos y generar HTML
-Object.keys(porDistrito).sort().forEach(dist => {
-html += <div class="distrito-header">${dist} (${porDistrito[dist].length})</div>;
-porDistrito[dist].forEach(p => {
-html +=  <div class="participant"> <div class="participant-info"> <strong>${p.nombre}</strong> <div class="participant-info-sub">Tel: ${p.telefono} | Cód: ${p.codigo}</div> </div> <div class="status ${p.checkin ? 'verde' : 'rojo'}"> ${p.checkin ? '<span>✅</span> Presente' : '<span>❌</span> Pendiente'} </div> </div>;
-});
-});
-container.innerHTML = html;
-}
-// Función para exportar a CSV
-function exportar() {
-if (data.length === 0) {
-alert("No hay datos para exportar.");
-return;
-}
-let csv = "Nombre,Distrito,Telefono,Codigo,Checkin,Fecha Checkin,Fecha Registro\n";
-data.forEach(p => {
-csv += "${p.nombre}","${p.distrito}","${p.telefono}","${p.codigo}","${p.checkin ? 'Si' : 'No'}","${p.checkinFecha || ''}","${p.fechaRegistro}"\n;
-});
-const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-const link = document.createElement("a");
-const url = URL.createObjectURL(blob);
-link.setAttribute("href", url);
-link.setAttribute("download", "lista_asistentes_viaje.csv");
-link.style.visibility = 'hidden';
-document.body.appendChild(link);
-link.click();
-document.body.removeChild(link);
-}
-// Iniciar en la primera pestaña
-showTab(0);
-</script>
-</body>
-</html>
+    <div class="container">
+        <header>
+            <h1>🚍 Viaje Seguro - Federación del Golfo</h1>
+        </header>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab(0)">Registro</div>
+            <div class="tab" onclick="showTab(1)">Check-in</div>
+            <div class="tab" onclick="showTab(2)">Lista</div>
+        </div>
+
+        <div id="tab0" class="card active">
+            <h2>Registro de Asistente</h2>
+            <input type="text" id="nombre" placeholder="Nombre completo">
+            <input type="tel" id="telefono" placeholder="Teléfono (opcional)">
+            <input type="text" id="distrito" placeholder="Distrito">
+            <button onclick="registrar()" class="success">Registrarme</button>
+        </div>
+
+        <div id="tab1" class="card">
+            <h2>Check-in de Asistencia</h2>
+            <input type="text" id="codigo" placeholder="Introduce tu código de 4 dígitos" maxlength="4" style="text-align: center; letter-spacing: 5px; font-weight: bold; font-size: 20px;">
+            <button onclick="hacerCheckin()" class="primary">Confirmar Mi Asistencia</button>
+        </div>
+
+        <div id="tab2" class="card">
+            <h2>Lista de Participantes</h2>
+            <input type="password" id="pass" placeholder="Contraseña de acceso">
+            <button onclick="verLista()" class="primary">Ver Lista</button>
+            <div id="lista_container" style="margin-top:20px; display: none;">
+                <div id="lista"></div>
+                <button onclick="exportar()" class="secondary">Exportar a CSV (Excel)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Almacenamiento local
+        let data = JSON.parse(localStorage.getItem('viajeFG')) || [];
+
+        // Función para cambiar de pestaña
+        function showTab(n) {
+            const cards = document.querySelectorAll('.card');
+            const tabs = document.querySelectorAll('.tab');
+
+            cards.forEach((c, i) => c.classList.toggle('active', i === n));
+            tabs.forEach((t, i) => t.classList.toggle('active', i === n));
+        }
+
+        // Función de Registro
+        function registrar() {
+            const nombre = document.getElementById('nombre').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            const distrito = document.getElementById('distrito').value.trim();
+
+            if (!nombre || !distrito) {
+                alert("⚠️ Por favor, rellena al menos Nombre y Distrito.");
+                return;
+            }
+
+            // Generar código aleatorio de 4 dígitos
+            const codigo = Math.floor(1000 + Math.random() * 9000);
+
+            // Guardar datos
+            data.push({
+                nombre, 
+                telefono: telefono || "-", 
+                distrito, 
+                codigo, 
+                checkin: false, 
+                checkinFecha: null, 
+                fechaRegistro: new Date().toLocaleString()
+            });
+            localStorage.setItem
