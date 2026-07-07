@@ -15,14 +15,15 @@
         input, button {padding:12px; margin:8px 0; width:100%; border-radius:8px; font-size:16px;}
         button {background:#4a6cf7; color:white; border:none; cursor:pointer;}
         button.success {background:#28a745;}
-        .participant {padding:15px; background:#f8f9fa; margin:10px 0; border-radius:10px;}
+        button.danger {background:#dc3545;}
+        .participant {padding:15px; background:#f8f9fa; margin:10px 0; border-radius:10px; position:relative;}
+        .delete-btn {position:absolute; top:10px; right:10px; background:#dc3545; padding:5px 10px; font-size:12px;}
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🚍 Viaje Seguro</h1>
-            <p>Federación del Golfo</p>
+            <h1>🚍 Viaje Seguro - Federación del Golfo</h1>
         </header>
 
         <div class="tabs">
@@ -43,7 +44,7 @@
         <!-- Check-in -->
         <div id="tab1" class="card" style="display:none">
             <h2>Check-in</h2>
-            <input type="text" id="codigo" placeholder="Ingresa tu código de 4 dígitos" maxlength="4">
+            <input type="text" id="codigo" placeholder="Código de 4 dígitos" maxlength="4">
             <button onclick="hacerCheckin()" class="success">Confirmar Asistencia</button>
         </div>
 
@@ -72,7 +73,7 @@
 
             if (!nombre || !distrito) return alert("Nombre y Distrito son obligatorios");
 
-            const codigo = Math.floor(1000 + Math.random() * 9000); // Código de 4 dígitos
+            const codigo = Math.floor(1000 + Math.random() * 9000);
 
             data.push({
                 nombre,
@@ -80,7 +81,8 @@
                 distrito,
                 codigo,
                 checkin: false,
-                fecha: new Date().toLocaleString()
+                checkinFecha: null,
+                fechaRegistro: new Date().toLocaleString()
             });
 
             localStorage.setItem('viajeFG', JSON.stringify(data));
@@ -96,6 +98,7 @@
             const persona = data.find(p => p.codigo == codigo);
             if (persona) {
                 persona.checkin = true;
+                persona.checkinFecha = new Date().toLocaleString();
                 localStorage.setItem('viajeFG', JSON.stringify(data));
                 alert(`✅ Check-in exitoso para ${persona.nombre}`);
                 document.getElementById('codigo').value = '';
@@ -110,31 +113,41 @@
             }
 
             const container = document.getElementById('lista');
-            let html = `<p><strong>Total registrados: ${data.length}</strong></p>`;
+            let html = `<p><strong>Total: ${data.length} participantes</strong></p>`;
 
-            data.forEach(p => {
+            data.forEach((p, index) => {
                 html += `
                     <div class="participant">
                         <strong>${p.nombre}</strong><br>
                         Distrito: ${p.distrito}<br>
                         Tel: ${p.telefono}<br>
                         Código: ${p.codigo}<br>
-                        Estado: ${p.checkin ? '✅ Presente' : '⏳ Pendiente'}
+                        Registrado: ${p.fechaRegistro}<br>
+                        ${p.checkin ? `Check-in: ${p.checkinFecha}` : '⏳ Sin check-in'}
+                        <button class="delete-btn" onclick="eliminar(${index})">Eliminar</button>
                     </div>`;
             });
 
             container.innerHTML = html || "<p>No hay registros.</p>";
         }
 
+        function eliminar(index) {
+            if (confirm("¿Eliminar este registro?")) {
+                data.splice(index, 1);
+                localStorage.setItem('viajeFG', JSON.stringify(data));
+                verLista();
+            }
+        }
+
         function exportar() {
-            let csv = "Nombre,Distrito,Teléfono,Código,Check-in,Fecha\n";
+            let csv = "Nombre,Distrito,Teléfono,Código,Check-in,Fecha Check-in,Fecha Registro\n";
             data.forEach(p => {
-                csv += `"\( {p.nombre}"," \){p.distrito}","\( {p.telefono}"," \){p.codigo}","\( {p.checkin ? 'Sí' : 'No'}"," \){p.fecha}"\n`;
+                csv += `"\( {p.nombre}"," \){p.distrito}","\( {p.telefono}"," \){p.codigo}","\( {p.checkin ? 'Sí' : 'No'}"," \){p.checkinFecha || '-'}","${p.fechaRegistro}"\n`;
             });
             const blob = new Blob([csv], {type: 'text/csv'});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'asistentes.csv';
+            a.download = 'asistentes_viaje.csv';
             a.click();
         }
 
