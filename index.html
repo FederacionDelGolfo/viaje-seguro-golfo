@@ -13,6 +13,7 @@
         button.success {background:#28a745;}
         .card {background:#f8f9fa; padding:20px; border-radius:12px; margin:15px 0;}
         .participant {padding:15px; background:white; margin:10px 0; border-radius:10px; border-left:5px solid #4a6cf7;}
+        .distrito-header {background:#e3f2fd; padding:10px; margin:15px 0; border-radius:8px; font-weight:bold;}
     </style>
 </head>
 <body>
@@ -59,10 +60,17 @@
                 return;
             }
 
-            data.push({nombre, telefono: telefono || "-", distrito, fecha: new Date().toLocaleString()});
-            localStorage.setItem('viajeFG2026', JSON.stringify(data));
+            data.push({
+                nombre: nombre,
+                telefono: telefono || "-",
+                distrito: distrito,
+                fecha: new Date().toLocaleString()
+            });
             
+            localStorage.setItem('viajeFG2026', JSON.stringify(data));
             alert("¡Registro exitoso!");
+            
+            // Limpiar campos
             document.getElementById('nombre').value = '';
             document.getElementById('telefono').value = '';
         }
@@ -74,27 +82,35 @@
                 return;
             }
 
-            const lista = document.getElementById('lista');
-            let html = '<h3>Total: ' + data.length + ' participantes</h3>';
-            
+            const container = document.getElementById('lista');
+            let html = `<p><strong>Total: ${data.length} participantes</strong></p>`;
+
             const porDistrito = {};
             data.forEach(p => {
                 if (!porDistrito[p.distrito]) porDistrito[p.distrito] = [];
                 porDistrito[p.distrito].push(p);
             });
 
-            Object.keys(porDistrito).sort().forEach(d => {
-                html += `<h4>\( {d} ( \){porDistrito[d].length})</h4>`;
-                porDistrito[d].forEach(p => {
-                    html += `<div class="participant"><strong>${p.nombre}</strong> - \( {p.telefono}<br><small> \){p.fecha}</small></div>`;
+            Object.keys(porDistrito).sort().forEach(distrito => {
+                html += `<div class="distrito-header">\( {distrito} ( \){porDistrito[distrito].length} personas)</div>`;
+                porDistrito[distrito].forEach(p => {
+                    html += `
+                        <div class="participant">
+                            <strong>${p.nombre}</strong><br>
+                            Tel: ${p.telefono}<br>
+                            <small>${p.fecha}</small>
+                        </div>`;
                 });
             });
-            lista.innerHTML = html;
+
+            container.innerHTML = html || "<p>No hay registros aún.</p>";
         }
 
         function exportar() {
             let csv = "Distrito,Nombre,Teléfono,Fecha\n";
-            data.forEach(p => csv += `"\( {p.distrito}"," \){p.nombre}","\( {p.telefono}"," \){p.fecha}"\n`);
+            data.forEach(p => {
+                csv += `"\( {p.distrito}"," \){p.nombre}","\( {p.telefono}"," \){p.fecha}"\n`;
+            });
             const blob = new Blob([csv], {type: 'text/csv'});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
