@@ -7,313 +7,148 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        body {font-family: Arial, sans-serif; margin:0; padding:0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:#333;}
-        .container {max-width: 1200px; margin:0 auto; padding:20px;}
-        header {background:white; padding:15px; border-radius:10px; box-shadow:0 4px 6px rgba(0,0,0,0.1); margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;}
-        h1 {margin:0; color:#4a6cf7;}
-        .tabs {display:flex; background:white; border-radius:8px; margin-bottom:20px; box-shadow:0 2px 4px rgba(0,0,0,0.1);}
-        .tab {padding:12px 24px; cursor:pointer; flex:1; text-align:center; border-radius:8px;}
+        body {font-family: Arial, sans-serif; margin:0; padding:0; background: linear-gradient(135deg, #667eea, #764ba2);}
+        .container {max-width: 1100px; margin:20px auto; background:white; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+        header {background:#4a6cf7; color:white; padding:20px; text-align:center;}
+        .tabs {display:flex; background:#f8f9fa; border-bottom:1px solid #ddd;}
+        .tab {flex:1; padding:15px; text-align:center; cursor:pointer; font-weight:bold;}
         .tab.active {background:#4a6cf7; color:white;}
-        .card {background:white; border-radius:10px; padding:20px; margin-bottom:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1);}
-        input, button {padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:6px;}
-        button {background:#4a6cf7; color:white; border:none; cursor:pointer; font-weight:bold;}
-        button:hover {background:#3b5acc;}
-        .participant {display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #eee;}
-        .qr-code {padding:15px; background:white; display:inline-block;}
-        video {width:100%; max-width:400px; border:2px solid #4a6cf7; border-radius:8px;}
+        .card {padding:25px;}
+        input {padding:12px; margin:8px 0; width:100%; border:1px solid #ddd; border-radius:8px;}
+        button {padding:12px 20px; margin:8px 0; border:none; border-radius:8px; background:#4a6cf7; color:white; font-size:16px; cursor:pointer;}
+        button.success {background:#28a745;}
+        .participant {padding:15px; background:#f8f9fa; margin:10px 0; border-radius:10px;}
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🚍 Viaje Seguro By Federación del Golfo</h1>
-            <div><span id="trip-name">Sin viaje</span> | <button onclick="logout()" style="background:#dc3545; padding:5px 10px; font-size:0.9em">Salir</button></div>
         </header>
 
-        <div id="login-screen">
-            <div class="card" style="max-width:400px; margin:100px auto;">
-                <h2>🔐 Acceso Organizador</h2>
-                <input type="password" id="password" placeholder="Contraseña" style="width:100%">
-                <button onclick="login()" style="width:100%">Entrar</button>
-                <small>Contraseña por defecto: <strong>federacion2026</strong></small>
-            </div>
+        <div class="tabs">
+            <div class="tab active" onclick="showTab(0)">Registro</div>
+            <div class="tab" onclick="showTab(1)">Check-in QR</div>
+            <div class="tab" onclick="showTab(2)">Lista</div>
         </div>
 
-        <div id="app-screen" style="display:none">
-            <div class="tabs">
-                <div class="tab active" onclick="showTab(0)">Viaje</div>
-                <div class="tab" onclick="showTab(1)">Asistentes</div>
-                <div class="tab" onclick="showTab(2)">Mapa</div>
-                <div class="tab" onclick="showTab(3)">Lista</div>
-                <div class="tab" onclick="showTab(4)">Escáner QR</div>
-            </div>
+        <!-- Registro -->
+        <div id="tab0" class="card">
+            <h2>Registro de Asistente</h2>
+            <input type="text" id="nombre" placeholder="Nombre completo">
+            <input type="tel" id="telefono" placeholder="Teléfono">
+            <button onclick="registrar()" class="success">Registrarme</button>
+        </div>
 
-            <!-- Tab Viaje -->
-            <div id="tab-0" class="tab-content">
-                <div class="card">
-                    <h2>Información del Viaje</h2>
-                    <input type="text" id="tripTitle" value="Viaje Federación del Golfo 2026" style="width:100%">
-                    <button onclick="saveTrip()" style="width:100%">Guardar Viaje</button>
-                </div>
-            </div>
+        <!-- Check-in con QR -->
+        <div id="tab1" class="card" style="display:none">
+            <h2>Escáner QR para Check-in</h2>
+            <video id="video" autoplay playsinline style="width:100%; max-width:400px; border:2px solid #4a6cf7;"></video>
+            <button onclick="iniciarEscaneo()" style="width:100%">Iniciar Cámara</button>
+            <div id="resultado" style="margin-top:15px; font-weight:bold;"></div>
+        </div>
 
-            <!-- Tab Asistentes -->
-            <div id="tab-1" class="tab-content" style="display:none">
-                <div class="card">
-                    <h2>Agregar Asistente</h2>
-                    <input type="text" id="name" placeholder="Nombre completo">
-                    <input type="tel" id="phone" placeholder="Teléfono">
-                    <button onclick="addParticipant()" style="width:100%">Agregar</button>
-                </div>
-                <div class="card">
-                    <h2>Participantes (<span id="count">0</span>)</h2>
-                    <button onclick="exportToExcel()" style="background:#28a745; width:100%; margin-bottom:10px">📊 Exportar a Excel</button>
-                    <div id="participants-list"></div>
-                </div>
-            </div>
-
-            <!-- Tab Mapa -->
-            <div id="tab-2" class="tab-content" style="display:none">
-                <div class="card">
-                    <h2>📍 Mapa en Tiempo Real</h2>
-                    <div id="map" style="height:450px; background:#e0e0e0; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                        <p>Google Maps se cargaría aquí</p>
-                        <small>Nota: Para usar Google Maps real necesitas una API Key</small>
-                    </div>
-                    <button onclick="simulateLocations()" style="width:100%; margin-top:10px">Actualizar Ubicaciones</button>
-                </div>
-            </div>
-
-            <!-- Tab Lista de Asistencia -->
-            <div id="tab-3" class="tab-content" style="display:none">
-                <div class="card">
-                    <h2>Historial de Asistencia</h2>
-                    <button onclick="takeAttendance()" style="background:#28a745; width:100%">Registrar Pase de Lista Ahora</button>
-                    <div id="attendance-history" style="margin-top:15px;"></div>
-                </div>
-            </div>
-
-            <!-- Tab Escáner QR -->
-            <div id="tab-4" class="tab-content" style="display:none">
-                <div class="card">
-                    <h2>Escáner QR para Check-in</h2>
-                    <video id="video" autoplay playsinline></video>
-                    <button onclick="startScanner()" style="width:100%; margin-top:10px">Iniciar Cámara</button>
-                    <button onclick="stopScanner()" style="background:#dc3545; width:100%">Detener Cámara</button>
-                    <div id="scan-result" style="margin-top:15px; font-weight:bold;"></div>
-                </div>
-            </div>
+        <!-- Lista Organizador -->
+        <div id="tab2" class="card" style="display:none">
+            <h2>Lista de Asistentes</h2>
+            <input type="password" id="pass" placeholder="Contraseña" style="width:60%">
+            <button onclick="accederLista()">Acceder</button>
+            <button onclick="exportarExcel()" class="success" style="display:none" id="btnExport">Exportar Excel</button>
+            <div id="lista" style="margin-top:20px;"></div>
         </div>
     </div>
 
     <script>
-        let currentTrip = null;
-        let participants = [];
-        let attendanceHistory = [];
-        let password = "federacion2026";
-        let isLoggedIn = false;
-        let videoStream = null;
+        let participantes = JSON.parse(localStorage.getItem('viajeFG')) || [];
+        const PASS = "federacion2026";
 
-        // Cargar datos guardados
-        function loadData() {
-            const saved = localStorage.getItem('viajeSeguroData');
-            if (saved) {
-                const data = JSON.parse(saved);
-                currentTrip = data.trip;
-                participants = data.participants || [];
-                attendanceHistory = data.history || [];
-            }
+        function showTab(n) {
+            document.querySelectorAll('.card').forEach((c,i) => c.style.display = i===n ? 'block' : 'none');
+            document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
         }
 
-        function saveData() {
-            if (currentTrip) {
-                localStorage.setItem('viajeSeguroData', JSON.stringify({
-                    trip: currentTrip,
-                    participants: participants,
-                    history: attendanceHistory
-                }));
-            }
+        function registrar() {
+            const nombre = document.getElementById('nombre').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            if (!nombre) return alert("Escribe tu nombre");
+            participantes.push({nombre, telefono, checkin: false, fecha: new Date().toLocaleString()});
+            localStorage.setItem('viajeFG', JSON.stringify(participantes));
+            alert("¡Registro exitoso!");
+            document.getElementById('nombre').value = '';
+            document.getElementById('telefono').value = '';
         }
 
-        function login() {
-            const inputPass = document.getElementById('password').value;
-            if (inputPass === password) {
-                isLoggedIn = true;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app-screen').style.display = 'block';
-                loadData();
-                if (currentTrip) document.getElementById('trip-name').textContent = currentTrip.title;
-                renderAll();
+        function accederLista() {
+            if (document.getElementById('pass').value === PASS) {
+                document.getElementById('btnExport').style.display = 'inline-block';
+                renderLista();
             } else {
                 alert("Contraseña incorrecta");
             }
         }
 
-        function logout() {
-            if (confirm("¿Cerrar sesión?")) {
-                location.reload();
-            }
-        }
-
-        function showTab(n) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-            document.getElementById(`tab-${n}`).style.display = 'block';
-            document.querySelectorAll('.tab').forEach((tab, i) => tab.classList.toggle('active', i === n));
-        }
-
-        function saveTrip() {
-            const title = document.getElementById('tripTitle').value || "Viaje Federación del Golfo";
-            currentTrip = { title, date: new Date().toISOString() };
-            document.getElementById('trip-name').textContent = title;
-            saveData();
-            alert("Viaje guardado");
-        }
-
-        function addParticipant() {
-            if (!currentTrip) return alert("Primero guarda el viaje");
-            const name = document.getElementById('name').value.trim();
-            if (!name) return alert("Ingresa nombre");
-            participants.push({
-                id: Date.now(),
-                name,
-                phone: document.getElementById('phone').value || "-",
-                present: false,
-                lastLocation: null
-            });
-            document.getElementById('name').value = '';
-            document.getElementById('phone').value = '';
-            renderParticipants();
-            saveData();
-        }
-
-        function renderParticipants() {
-            const container = document.getElementById('participants-list');
-            container.innerHTML = participants.map(p => `
+        function renderLista() {
+            const div = document.getElementById('lista');
+            div.innerHTML = participantes.map((p, i) => `
                 <div class="participant">
-                    <div><strong>\( {p.name}</strong><br><small> \){p.phone}</small></div>
                     <div>
-                        <button onclick="showQR(${p.id})">QR</button>
-                        <button onclick="togglePresent(\( {p.id})"> \){p.present ? '✅' : '⏳'}</button>
+                        <strong>${p.nombre}</strong><br>
+                        ${p.telefono} - ${p.fecha}
                     </div>
-                </div>
-            `).join('');
-            document.getElementById('count').textContent = participants.length;
-        }
-
-        function togglePresent(id) {
-            const p = participants.find(x => x.id === id);
-            if (p) p.present = !p.present;
-            renderParticipants();
-            saveData();
-        }
-
-        function showQR(id) {
-            const p = participants.find(x => x.id === id);
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;';
-            modal.innerHTML = `
-                <div style="background:white;padding:20px;border-radius:12px;text-align:center;max-width:90%;">
-                    <h3>Check-in: ${p.name}</h3>
-                    <div id="qrcode-modal"></div>
-                    <p><strong>${p.phone}</strong></p>
-                    <button onclick="this.closest('.modal-container').remove()">Cerrar</button>
-                </div>
-            `;
-            modal.className = 'modal-container';
-            document.body.appendChild(modal);
-            setTimeout(() => new QRCode(document.getElementById("qrcode-modal"), `VS|\( {p.id}| \){p.name}`), 50);
-        }
-
-        function takeAttendance() {
-            const now = new Date().toLocaleString('es-MX');
-            const presentCount = participants.filter(p => p.present).length;
-            
-            attendanceHistory.unshift({
-                date: now,
-                total: participants.length,
-                present: presentCount
-            });
-            
-            saveData();
-            renderHistory();
-            alert(`Pase de lista registrado: \( {presentCount}/ \){participants.length} presentes`);
-        }
-
-        function renderHistory() {
-            const container = document.getElementById('attendance-history');
-            container.innerHTML = `<h3>Historial</h3>` + attendanceHistory.map(h => `
-                <div class="participant">
-                    <div>${h.date}</div>
-                    <div>\( {h.present}/ \){h.total} presentes</div>
+                    <button onclick="toggleCheckin(\( {i})"> \){p.checkin ? '✅' : 'Check-in'}</button>
                 </div>
             `).join('');
         }
 
-        function simulateLocations() {
-            alert("Ubicaciones actualizadas (simulado).\n\nPara Google Maps real agrega tu API Key.");
-            document.getElementById('map').innerHTML = `<p>✅ Ubicaciones simuladas actualizadas</p>`;
+        function toggleCheckin(i) {
+            participantes[i].checkin = !participantes[i].checkin;
+            localStorage.setItem('viajeFG', JSON.stringify(participantes));
+            renderLista();
         }
 
-        function exportToExcel() {
-            let csv = "Nombre,Teléfono,Estado\n";
-            participants.forEach(p => {
-                csv += `"\( {p.name}"," \){p.phone}","${p.present ? 'Presente' : 'Ausente'}"\n`;
+        function exportarExcel() {
+            let csv = "Nombre,Teléfono,Check-in,Fecha\n";
+            participantes.forEach(p => {
+                csv += `"\( {p.nombre}"," \){p.telefono}","\( {p.checkin ? 'Sí' : 'No'}"," \){p.fecha}"\n`;
             });
-            const blob = new Blob([csv], { type: 'text/csv' });
+            const blob = new Blob([csv], {type: 'text/csv'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `Asistentes_${new Date().toISOString().slice(0,10)}.csv`;
+            a.download = 'asistentes_viaje.csv';
             a.click();
         }
 
-        // === ESCÁNER QR ===
-        function startScanner() {
+        // Escáner QR
+        let stream = null;
+        function iniciarEscaneo() {
             const video = document.getElementById('video');
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                .then(stream => {
-                    videoStream = stream;
-                    video.srcObject = stream;
-                    scanQR(video);
-                })
-                .catch(err => alert("Error al acceder a la cámara: " + err.message));
+            navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}}).then(s => {
+                stream = s;
+                video.srcObject = s;
+                escanear(video);
+            }).catch(() => alert("No se pudo acceder a la cámara"));
         }
 
-        function stopScanner() {
-            if (videoStream) videoStream.getTracks().forEach(track => track.stop());
-        }
-
-        function scanQR(video) {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            const tick = () => {
+        function escanear(video) {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            setInterval(() => {
                 if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                    canvas.height = video.videoHeight;
                     canvas.width = video.videoWidth;
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    canvas.height = video.videoHeight;
+                    ctx.drawImage(video, 0, 0);
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const code = jsQR(imageData.data, imageData.width, imageData.height);
-                    
                     if (code) {
-                        document.getElementById('scan-result').innerHTML = `✅ Escaneado: ${code.data}<br><strong>Check-in registrado</strong>`;
-                        stopScanner();
-                        return;
+                        document.getElementById('resultado').innerHTML = `✅ Check-in: ${code.data}`;
+                        stream.getTracks().forEach(track => track.stop());
                     }
                 }
-                requestAnimationFrame(tick);
-            };
-            tick();
+            }, 300);
         }
 
-        function renderAll() {
-            renderParticipants();
-            renderHistory();
-        }
-
-        window.onload = () => {
-            loadData();
-        };
+        showTab(0);
     </script>
 </body>
 </html>
