@@ -4,22 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viaje Seguro - Federación del Golfo</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
         body {font-family: Arial, sans-serif; margin:0; padding:20px; background: linear-gradient(135deg, #667eea, #764ba2);}
         .container {max-width: 900px; margin:auto; background:white; border-radius:15px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3);}
         h1 {text-align:center; color:#4a6cf7;}
-        input, select, button {padding:12px; margin:10px 0; width:100%; border-radius:8px; font-size:16px;}
+        input, select, button {padding:12px; margin:8px 0; width:100%; border-radius:8px; font-size:16px;}
         button {background:#4a6cf7; color:white; border:none; cursor:pointer;}
         button.success {background:#28a745;}
         .card {background:#f8f9fa; padding:20px; border-radius:12px; margin:15px 0;}
-        .participant {padding:15px; background:white; margin:10px 0; border-radius:10px; border-left:5px solid #4a6cf7;}
-        .distrito-header {background:#e3f2fd; padding:12px; margin:15px 0; border-radius:8px; font-weight:bold;}
+        .participant {padding:15px; background:white; margin:10px 0; border-radius:10px;}
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🚍 Viaje Seguro - Federación del Golfo</h1>
 
+        <!-- Registro -->
         <div class="card">
             <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="Nombre completo">
@@ -38,74 +39,75 @@
             <button onclick="registrar()" class="success">Registrarme</button>
         </div>
 
+        <!-- Check-in -->
         <div class="card">
-            <h2>Lista de Asistentes</h2>
+            <h2>Check-in (Ingresa tu código)</h2>
+            <input type="text" id="codigoCheck" placeholder="Ingresa tu código">
+            <button onclick="checkin()" class="success">Hacer Check-in</button>
+        </div>
+
+        <!-- Lista Organizador -->
+        <div class="card">
+            <h2>Lista (Organizador)</h2>
             <input type="password" id="pass" placeholder="Contraseña" style="width:70%">
             <button onclick="verLista()">Ver Lista</button>
-            <div id="lista" style="margin-top:20px;"></div>
-            <button onclick="exportar()" class="success" style="margin-top:15px">Exportar a Excel</button>
+            <div id="lista"></div>
+            <button onclick="exportar()" class="success" style="margin-top:10px">Exportar Excel</button>
         </div>
     </div>
 
     <script>
-        let data = JSON.parse(localStorage.getItem('viajeFG2026')) || [];
+        let data = JSON.parse(localStorage.getItem('viajeFG')) || [];
 
         function registrar() {
             const nombre = document.getElementById('nombre').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
             const distrito = document.getElementById('distrito').value;
             
-            if (!nombre || !distrito) {
-                alert("Nombre y Distrito son obligatorios");
-                return;
-            }
+            if (!nombre || !distrito) return alert("Nombre y Distrito obligatorios");
 
-            data.push({
-                nombre: nombre,
-                telefono: telefono || "-",
-                distrito: distrito,
-                fecha: new Date().toLocaleString()
-            });
+            const codigo = "FG" + Date.now().toString().slice(-6);
+
+            data.push({nombre, telefono: telefono || "-", distrito, codigo, checkin: false, fecha: new Date().toLocaleString()});
+            localStorage.setItem('viajeFG', JSON.stringify(data));
             
-            localStorage.setItem('viajeFG2026', JSON.stringify(data));
-            alert("¡Registro exitoso!");
+            alert(`¡Registro exitoso!\nTu código es: ${codigo}`);
             document.getElementById('nombre').value = '';
             document.getElementById('telefono').value = '';
         }
 
+        function checkin() {
+            const codigo = document.getElementById('codigoCheck').value.trim();
+            const persona = data.find(p => p.codigo === codigo);
+            if (persona) {
+                persona.checkin = true;
+                localStorage.setItem('viajeFG', JSON.stringify(data));
+                alert(`✅ Check-in exitoso para ${persona.nombre}`);
+            } else {
+                alert("Código inválido");
+            }
+        }
+
         function verLista() {
             if (document.getElementById('pass').value !== "federacion2026") {
-                alert("Contraseña incorrecta");
-                return;
+                return alert("Contraseña incorrecta");
             }
-
-            const container = document.getElementById('lista');
-            let html = `<p><strong>Total: ${data.length} participantes</strong></p>`;
-
-            const grupos = {};
+            const div = document.getElementById('lista');
+            let html = `<p>Total: ${data.length}</p>`;
             data.forEach(p => {
-                if (!grupos[p.distrito]) grupos[p.distrito] = [];
-                grupos[p.distrito].push(p);
+                html += `<div class="participant">
+                    <strong>\( {p.nombre}</strong> ( \){p.distrito})<br>
+                    Tel: ${p.telefono}<br>
+                    Código: ${p.codigo}<br>
+                    Estado: ${p.checkin ? '✅ Presente' : '⏳ Pendiente'}
+                </div>`;
             });
-
-            Object.keys(grupos).sort().forEach(dist => {
-                html += `<div class="distrito-header">\( {dist} ( \){grupos[dist].length})</div>`;
-                grupos[dist].forEach(p => {
-                    html += `<div class="participant">
-                        <strong>${p.nombre}</strong><br>
-                        Tel: ${p.telefono}<br>
-                        Distrito: ${p.distrito}<br>
-                        <small>${p.fecha}</small>
-                    </div>`;
-                });
-            });
-
-            container.innerHTML = html || "<p>No hay registros.</p>";
+            div.innerHTML = html;
         }
 
         function exportar() {
-            let csv = "Distrito,Nombre,Teléfono,Fecha\n";
-            data.forEach(p => csv += `"\( {p.distrito}"," \){p.nombre}","\( {p.telefono}"," \){p.fecha}"\n`);
+            let csv = "Nombre,Distrito,Teléfono,Código,Check-in,Fecha\n";
+            data.forEach(p => csv += `"\( {p.nombre}"," \){p.distrito}","\( {p.telefono}"," \){p.codigo}","\( {p.checkin ? 'Sí' : 'No'}"," \){p.fecha}"\n`);
             const blob = new Blob([csv], {type: 'text/csv'});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
