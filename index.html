@@ -14,10 +14,11 @@
         .tab {flex:1; padding:15px; text-align:center; cursor:pointer; font-weight:bold;}
         .tab.active {background:#4a6cf7; color:white;}
         .card {padding:25px;}
-        input {padding:12px; margin:8px 0; width:100%; border:1px solid #ddd; border-radius:8px;}
+        input, select {padding:12px; margin:8px 0; width:100%; border:1px solid #ddd; border-radius:8px; font-size:16px;}
         button {padding:12px 20px; margin:8px 0; border:none; border-radius:8px; background:#4a6cf7; color:white; font-size:16px; cursor:pointer;}
         button.success {background:#28a745;}
         .participant {padding:15px; background:#f8f9fa; margin:10px 0; border-radius:10px;}
+        .distrito-header {background:#e3f2fd; padding:10px; margin:15px 0 10px; border-radius:8px; font-weight:bold;}
     </style>
 </head>
 <body>
@@ -29,7 +30,7 @@
         <div class="tabs">
             <div class="tab active" onclick="showTab(0)">Registro</div>
             <div class="tab" onclick="showTab(1)">Check-in QR</div>
-            <div class="tab" onclick="showTab(2)">Lista</div>
+            <div class="tab" onclick="showTab(2)">Lista por Distrito</div>
         </div>
 
         <!-- Registro -->
@@ -37,24 +38,35 @@
             <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="Nombre completo">
             <input type="tel" id="telefono" placeholder="Teléfono">
+            <select id="distrito">
+                <option value="">Selecciona tu distrito</option>
+                <option value="Benito Juárez">Benito Juárez</option>
+                <option value="Coyoacán">Coyoacán</option>
+                <option value="Álvaro Obregón">Álvaro Obregón</option>
+                <option value="Miguel Hidalgo">Miguel Hidalgo</option>
+                <option value="Cuauhtémoc">Cuauhtémoc</option>
+                <option value="Iztapalapa">Iztapalapa</option>
+                <option value="Gustavo A. Madero">Gustavo A. Madero</option>
+                <option value="Otro">Otro</option>
+            </select>
             <button onclick="registrar()" class="success">Registrarme</button>
         </div>
 
-        <!-- Check-in con QR -->
+        <!-- Check-in -->
         <div id="tab1" class="card" style="display:none">
-            <h2>Escáner QR para Check-in</h2>
-            <video id="video" autoplay playsinline style="width:100%; max-width:400px; border:2px solid #4a6cf7;"></video>
-            <button onclick="iniciarEscaneo()" style="width:100%">Iniciar Cámara</button>
-            <div id="resultado" style="margin-top:15px; font-weight:bold;"></div>
+            <h2>Escáner QR Check-in</h2>
+            <video id="video" autoplay playsinline style="width:100%; max-width:400px;"></video>
+            <button onclick="iniciarEscaneo()">Iniciar Cámara</button>
+            <div id="resultado" style="margin-top:15px; font-weight:bold; color:green;"></div>
         </div>
 
-        <!-- Lista Organizador -->
+        <!-- Lista por Distrito -->
         <div id="tab2" class="card" style="display:none">
-            <h2>Lista de Asistentes</h2>
-            <input type="password" id="pass" placeholder="Contraseña" style="width:60%">
+            <h2>Lista de Asistentes por Distrito</h2>
+            <input type="password" id="pass" placeholder="Contraseña organizador" style="width:60%">
             <button onclick="accederLista()">Acceder</button>
-            <button onclick="exportarExcel()" class="success" style="display:none" id="btnExport">Exportar Excel</button>
-            <div id="lista" style="margin-top:20px;"></div>
+            <button onclick="exportarExcel()" class="success" id="btnExport" style="display:none">Exportar Excel</button>
+            <div id="lista-distritos"></div>
         </div>
     </div>
 
@@ -70,85 +82,14 @@
         function registrar() {
             const nombre = document.getElementById('nombre').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
-            if (!nombre) return alert("Escribe tu nombre");
-            participantes.push({nombre, telefono, checkin: false, fecha: new Date().toLocaleString()});
-            localStorage.setItem('viajeFG', JSON.stringify(participantes));
-            alert("¡Registro exitoso!");
-            document.getElementById('nombre').value = '';
-            document.getElementById('telefono').value = '';
-        }
-
-        function accederLista() {
-            if (document.getElementById('pass').value === PASS) {
-                document.getElementById('btnExport').style.display = 'inline-block';
-                renderLista();
-            } else {
-                alert("Contraseña incorrecta");
-            }
-        }
-
-        function renderLista() {
-            const div = document.getElementById('lista');
-            div.innerHTML = participantes.map((p, i) => `
-                <div class="participant">
-                    <div>
-                        <strong>${p.nombre}</strong><br>
-                        ${p.telefono} - ${p.fecha}
-                    </div>
-                    <button onclick="toggleCheckin(\( {i})"> \){p.checkin ? '✅' : 'Check-in'}</button>
-                </div>
-            `).join('');
-        }
-
-        function toggleCheckin(i) {
-            participantes[i].checkin = !participantes[i].checkin;
-            localStorage.setItem('viajeFG', JSON.stringify(participantes));
-            renderLista();
-        }
-
-        function exportarExcel() {
-            let csv = "Nombre,Teléfono,Check-in,Fecha\n";
-            participantes.forEach(p => {
-                csv += `"\( {p.nombre}"," \){p.telefono}","\( {p.checkin ? 'Sí' : 'No'}"," \){p.fecha}"\n`;
+            const distrito = document.getElementById('distrito').value;
+            
+            if (!nombre || !distrito) return alert("Nombre y Distrito son obligatorios");
+            
+            participantes.push({
+                nombre,
+                telefono: telefono || "Sin teléfono",
+                distrito,
+                checkin: false,
+                fecha: new Date().toLocaleString()
             });
-            const blob = new Blob([csv], {type: 'text/csv'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'asistentes_viaje.csv';
-            a.click();
-        }
-
-        // Escáner QR
-        let stream = null;
-        function iniciarEscaneo() {
-            const video = document.getElementById('video');
-            navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}}).then(s => {
-                stream = s;
-                video.srcObject = s;
-                escanear(video);
-            }).catch(() => alert("No se pudo acceder a la cámara"));
-        }
-
-        function escanear(video) {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            setInterval(() => {
-                if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    ctx.drawImage(video, 0, 0);
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const code = jsQR(imageData.data, imageData.width, imageData.height);
-                    if (code) {
-                        document.getElementById('resultado').innerHTML = `✅ Check-in: ${code.data}`;
-                        stream.getTracks().forEach(track => track.stop());
-                    }
-                }
-            }, 300);
-        }
-
-        showTab(0);
-    </script>
-</body>
-</html>
