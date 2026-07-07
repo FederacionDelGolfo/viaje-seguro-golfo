@@ -4,42 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viaje Seguro - Federación del Golfo</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        body {font-family: Arial, sans-serif; margin:0; padding:0; background: linear-gradient(135deg, #667eea, #764ba2);}
-        .container {max-width: 1100px; margin:20px auto; background:white; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.3);}
-        header {background:#4a6cf7; color:white; padding:20px; text-align:center;}
-        .tabs {display:flex; background:#f8f9fa; border-bottom:1px solid #ddd;}
-        .tab {flex:1; padding:15px; text-align:center; cursor:pointer; font-weight:bold;}
-        .tab.active {background:#4a6cf7; color:white;}
-        .card {padding:25px;}
-        input, select {padding:12px; margin:8px 0; width:100%; border:1px solid #ddd; border-radius:8px; font-size:16px;}
-        button {padding:12px 20px; margin:8px 0; border:none; border-radius:8px; background:#4a6cf7; color:white; font-size:16px; cursor:pointer;}
+        body {font-family: Arial, sans-serif; margin:0; padding:20px; background: linear-gradient(135deg, #667eea, #764ba2);}
+        .container {max-width: 900px; margin:auto; background:white; border-radius:15px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+        h1 {text-align:center; color:#4a6cf7;}
+        input, select, button {padding:12px; margin:10px 0; width:100%; border-radius:8px; font-size:16px;}
+        button {background:#4a6cf7; color:white; border:none; cursor:pointer;}
         button.success {background:#28a745;}
-        .participant {padding:15px; background:#f8f9fa; margin:10px 0; border-radius:10px;}
-        .distrito-header {background:#e3f2fd; padding:10px; margin:15px 0 10px; border-radius:8px; font-weight:bold;}
+        .card {background:#f8f9fa; padding:20px; border-radius:12px; margin:15px 0;}
+        .participant {padding:15px; background:white; margin:10px 0; border-radius:10px; border-left:5px solid #4a6cf7;}
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🚍 Viaje Seguro By Federación del Golfo</h1>
-        </header>
+        <h1>🚍 Viaje Seguro - Federación del Golfo</h1>
 
-        <div class="tabs">
-            <div class="tab active" onclick="showTab(0)">Registro</div>
-            <div class="tab" onclick="showTab(1)">Check-in QR</div>
-            <div class="tab" onclick="showTab(2)">Lista por Distrito</div>
-        </div>
-
-        <!-- Registro -->
-        <div id="tab0" class="card">
+        <div class="card">
             <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="Nombre completo">
             <input type="tel" id="telefono" placeholder="Teléfono">
             <select id="distrito">
-                <option value="">Selecciona tu distrito</option>
+                <option value="">Selecciona Distrito</option>
                 <option value="Benito Juárez">Benito Juárez</option>
                 <option value="Coyoacán">Coyoacán</option>
                 <option value="Álvaro Obregón">Álvaro Obregón</option>
@@ -52,44 +37,70 @@
             <button onclick="registrar()" class="success">Registrarme</button>
         </div>
 
-        <!-- Check-in -->
-        <div id="tab1" class="card" style="display:none">
-            <h2>Escáner QR Check-in</h2>
-            <video id="video" autoplay playsinline style="width:100%; max-width:400px;"></video>
-            <button onclick="iniciarEscaneo()">Iniciar Cámara</button>
-            <div id="resultado" style="margin-top:15px; font-weight:bold; color:green;"></div>
-        </div>
-
-        <!-- Lista por Distrito -->
-        <div id="tab2" class="card" style="display:none">
-            <h2>Lista de Asistentes por Distrito</h2>
-            <input type="password" id="pass" placeholder="Contraseña organizador" style="width:60%">
-            <button onclick="accederLista()">Acceder</button>
-            <button onclick="exportarExcel()" class="success" id="btnExport" style="display:none">Exportar Excel</button>
-            <div id="lista-distritos"></div>
+        <div class="card">
+            <h2>Lista de Asistentes (Organizador)</h2>
+            <input type="password" id="pass" placeholder="Contraseña" style="width:70%">
+            <button onclick="verLista()">Ver Lista</button>
+            <div id="lista" style="margin-top:20px;"></div>
+            <button onclick="exportar()" class="success" style="margin-top:15px">Exportar a Excel</button>
         </div>
     </div>
 
     <script>
-        let participantes = JSON.parse(localStorage.getItem('viajeFG')) || [];
-        const PASS = "federacion2026";
-
-        function showTab(n) {
-            document.querySelectorAll('.card').forEach((c,i) => c.style.display = i===n ? 'block' : 'none');
-            document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
-        }
+        let data = JSON.parse(localStorage.getItem('viajeFG2026')) || [];
 
         function registrar() {
             const nombre = document.getElementById('nombre').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
             const distrito = document.getElementById('distrito').value;
             
-            if (!nombre || !distrito) return alert("Nombre y Distrito son obligatorios");
+            if (!nombre || !distrito) {
+                alert("Nombre y Distrito son obligatorios");
+                return;
+            }
+
+            data.push({nombre, telefono: telefono || "-", distrito, fecha: new Date().toLocaleString()});
+            localStorage.setItem('viajeFG2026', JSON.stringify(data));
             
-            participantes.push({
-                nombre,
-                telefono: telefono || "Sin teléfono",
-                distrito,
-                checkin: false,
-                fecha: new Date().toLocaleString()
+            alert("¡Registro exitoso!");
+            document.getElementById('nombre').value = '';
+            document.getElementById('telefono').value = '';
+        }
+
+        function verLista() {
+            const pass = document.getElementById('pass').value;
+            if (pass !== "federacion2026") {
+                alert("Contraseña incorrecta");
+                return;
+            }
+
+            const lista = document.getElementById('lista');
+            let html = '<h3>Total: ' + data.length + ' participantes</h3>';
+            
+            const porDistrito = {};
+            data.forEach(p => {
+                if (!porDistrito[p.distrito]) porDistrito[p.distrito] = [];
+                porDistrito[p.distrito].push(p);
             });
+
+            Object.keys(porDistrito).sort().forEach(d => {
+                html += `<h4>\( {d} ( \){porDistrito[d].length})</h4>`;
+                porDistrito[d].forEach(p => {
+                    html += `<div class="participant"><strong>${p.nombre}</strong> - \( {p.telefono}<br><small> \){p.fecha}</small></div>`;
+                });
+            });
+            lista.innerHTML = html;
+        }
+
+        function exportar() {
+            let csv = "Distrito,Nombre,Teléfono,Fecha\n";
+            data.forEach(p => csv += `"\( {p.distrito}"," \){p.nombre}","\( {p.telefono}"," \){p.fecha}"\n`);
+            const blob = new Blob([csv], {type: 'text/csv'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'asistentes_federacion_golfo.csv';
+            a.click();
+        }
+    </script>
+</body>
+</html>
