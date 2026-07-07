@@ -26,7 +26,6 @@
             margin: 0;
             padding: 20px;
             background-color: var(--primary-bg);
-            /* Patrón sutil de fondo para textura moderna */
             background-image: 
                 radial-gradient(at 10% 10%, rgba(108, 92, 231, 0.15) 0px, transparent 50%),
                 radial-gradient(at 90% 90%, rgba(0, 206, 201, 0.1) 0px, transparent 50%);
@@ -97,19 +96,10 @@
             box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
         }
 
+        /* Corrección de visualización en las Cards */
         .card {
             padding: 35px 30px;
-            display: none;
-        }
-
-        .card.active {
-            display: block;
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            display: none; 
         }
 
         h2 {
@@ -121,7 +111,6 @@
             letter-spacing: -0.3px;
         }
 
-        /* Estilo para los campos de entrada */
         input {
             padding: 16px;
             margin: 10px 0;
@@ -146,7 +135,6 @@
             background-color: rgba(255,255,255,0.08);
         }
 
-        /* Estilo para botones */
         button {
             padding: 16px;
             margin: 20px 0 10px;
@@ -183,7 +171,6 @@
             box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4);
         }
 
-        /* Botón secundario para la lista */
         button.secondary {
             background-color: transparent;
             color: var(--primary-accent);
@@ -195,12 +182,6 @@
             background-color: rgba(108, 92, 231, 0.1);
         }
 
-        /* Estilos de la lista de participantes */
-        #lista p {
-            color: var(--text-muted);
-            font-size: 15px;
-        }
-
         .participant {
             padding: 18px;
             background-color: rgba(255,255,255,0.03);
@@ -210,11 +191,6 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid rgba(255,255,255,0.03);
-            transition: background-color 0.2s;
-        }
-
-        .participant:hover {
-            background-color: rgba(255,255,255,0.05);
         }
 
         .participant strong {
@@ -235,17 +211,14 @@
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
-        .verde {
+        .verde .status {
             background-color: rgba(0, 184, 148, 0.15);
             color: var(--success-color);
         }
 
-        .rojo {
+        .rojo .status {
             background-color: rgba(255, 118, 117, 0.15);
             color: var(--error-color);
         }
@@ -262,7 +235,6 @@
             text-transform: uppercase;
         }
 
-        /* Responsive */
         @media (max-width: 600px) {
             body { padding: 10px; }
             header { padding: 20px 15px; }
@@ -287,7 +259,7 @@
             <div class="tab" onclick="showTab(2)">Lista</div>
         </div>
 
-        <div id="tab0" class="card active">
+        <div id="tab0" class="card">
             <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="Nombre completo">
             <input type="tel" id="telefono" placeholder="Teléfono (opcional)">
@@ -313,19 +285,22 @@
     </div>
 
     <script>
-        // Almacenamiento local
         let data = JSON.parse(localStorage.getItem('viajeFG')) || [];
 
-        // Función para cambiar de pestaña
+        // Función corregida para alternar pestañas usando .style.display de forma limpia
         function showTab(n) {
             const cards = document.querySelectorAll('.card');
             const tabs = document.querySelectorAll('.tab');
 
-            cards.forEach((c, i) => c.classList.toggle('active', i === n));
-            tabs.forEach((t, i) => t.classList.toggle('active', i === n));
+            cards.forEach((c, i) => {
+                c.style.display = (i === n) ? 'block' : 'none';
+            });
+            
+            tabs.forEach((t, i) => {
+                t.classList.toggle('active', i === n);
+            });
         }
 
-        // Función de Registro
         function registrar() {
             const nombre = document.getElementById('nombre').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
@@ -336,10 +311,8 @@
                 return;
             }
 
-            // Generar código aleatorio de 4 dígitos
             const codigo = Math.floor(1000 + Math.random() * 9000);
 
-            // Guardar datos
             data.push({
                 nombre, 
                 telefono: telefono || "-", 
@@ -349,4 +322,103 @@
                 checkinFecha: null, 
                 fechaRegistro: new Date().toLocaleString()
             });
-            localStorage.setItem
+            localStorage.setItem('viajeFG', JSON.stringify(data));
+
+            alert(`✅ ¡Registro exitoso, ${nombre}!\nTu código de check-in es: ${codigo}`);
+            
+            document.getElementById('nombre').value = '';
+            document.getElementById('telefono').value = '';
+            document.getElementById('distrito').value = '';
+        }
+
+        function hacerCheckin() {
+            const codigoInput = document.getElementById('codigo').value.trim();
+            const persona = data.find(p => p.codigo == codigoInput);
+
+            if (persona) {
+                if (persona.checkin) {
+                    alert(`ℹ️ ${persona.nombre}, ya has confirmado tu asistencia anteriormente.`);
+                } else {
+                    persona.checkin = true;
+                    persona.checkinFecha = new Date().toLocaleString();
+                    localStorage.setItem('viajeFG', JSON.stringify(data));
+                    alert(`🎉 ✅ ¡Check-in confirmado para ${persona.nombre}! ¡Buen viaje!`);
+                }
+                document.getElementById('codigo').value = '';
+            } else {
+                alert("❌ Código incorrecto. Por favor, revísalo.");
+            }
+        }
+
+        function verLista() {
+            const pass = document.getElementById('pass').value;
+            // Contraseña fija: federacion2026
+            if (pass !== "federacion2026") {
+                alert("❌ Contraseña incorrecta.");
+                document.getElementById('lista_container').style.display = 'none';
+                return;
+            }
+
+            const container = document.getElementById('lista');
+            const mainContainer = document.getElementById('lista_container');
+            mainContainer.style.display = 'block';
+
+            if (data.length === 0) {
+                container.innerHTML = "<p>No hay registros todavía.</p>";
+                return;
+            }
+
+            let html = `<p><strong>Total: ${data.length} participantes registrados</strong></p>`;
+
+            const porDistrito = {};
+            data.forEach(p => {
+                if (!porDistrito[p.distrito]) porDistrito[p.distrito] = [];
+                porDistrito[p.distrito].push(p);
+            });
+
+            Object.keys(porDistrito).sort().forEach(dist => {
+                html += `<div class="distrito-header">${dist} (${porDistrito[dist].length})</div>`;
+                porDistrito[dist].forEach(p => {
+                    html += `
+                        <div class="participant ${p.checkin ? 'verde' : 'rojo'}">
+                            <div class="participant-info">
+                                <strong>${p.nombre}</strong>
+                                <div class="participant-info-sub">Tel: ${p.telefono} | Cód: ${p.codigo}</div>
+                            </div>
+                            <div class="status">
+                                ${p.checkin ? '✅ Presente' : '❌ Pendiente'}
+                            </div>
+                        </div>`;
+                });
+            });
+
+            container.innerHTML = html;
+        }
+
+        function exportar() {
+            if (data.length === 0) {
+                alert("No hay datos para exportar.");
+                return;
+            }
+
+            let csv = "\uFEFFNombre,Distrito,Telefono,Codigo,Checkin,Fecha Checkin,Fecha Registro\n";
+            data.forEach(p => {
+                csv += `"${p.nombre}","${p.distrito}","${p.telefono}","${p.codigo}","${p.checkin ? 'Si' : 'No'}","${p.checkinFecha || ''}","${p.fechaRegistro}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "lista_asistentes_viaje.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Inicialización obligatoria
+        showTab(0);
+    </script>
+</body>
+</html>
