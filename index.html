@@ -13,7 +13,7 @@
         button.success {background:#28a745;}
         .card {background:#f8f9fa; padding:20px; border-radius:12px; margin:15px 0;}
         .participant {padding:15px; background:white; margin:10px 0; border-radius:10px; border-left:5px solid #4a6cf7;}
-        .distrito-header {background:#e3f2fd; padding:12px; margin:15px 0; border-radius:8px; font-weight:bold; color:#1e4a8c;}
+        .distrito-header {background:#e3f2fd; padding:12px; margin:15px 0; border-radius:8px; font-weight:bold;}
     </style>
 </head>
 <body>
@@ -39,7 +39,7 @@
         </div>
 
         <div class="card">
-            <h2>Lista de Asistentes (Organizador)</h2>
+            <h2>Lista de Asistentes</h2>
             <input type="password" id="pass" placeholder="Contraseña" style="width:70%">
             <button onclick="verLista()">Ver Lista</button>
             <div id="lista" style="margin-top:20px;"></div>
@@ -74,8 +74,7 @@
         }
 
         function verLista() {
-            const pass = document.getElementById('pass').value;
-            if (pass !== "federacion2026") {
+            if (document.getElementById('pass').value !== "federacion2026") {
                 alert("Contraseña incorrecta");
                 return;
             }
@@ -83,36 +82,34 @@
             const container = document.getElementById('lista');
             let html = `<p><strong>Total: ${data.length} participantes</strong></p>`;
 
-            const porDistrito = {};
+            const grupos = {};
             data.forEach(p => {
-                if (!porDistrito[p.distrito]) porDistrito[p.distrito] = [];
-                porDistrito[p.distrito].push(p);
+                if (!grupos[p.distrito]) grupos[p.distrito] = [];
+                grupos[p.distrito].push(p);
             });
 
-            Object.keys(porDistrito).sort().forEach(distrito => {
-                html += `<div class="distrito-header">\( {distrito} ( \){porDistrito[distrito].length} personas)</div>`;
-                porDistrito[distrito].forEach(p => {
-                    html += `
-                        <div class="participant">
-                            <strong>${p.nombre}</strong><br>
-                            Tel: ${p.telefono}<br>
-                            <small>${p.fecha}</small>
-                        </div>`;
+            Object.keys(grupos).sort().forEach(dist => {
+                html += `<div class="distrito-header">\( {dist} ( \){grupos[dist].length})</div>`;
+                grupos[dist].forEach(p => {
+                    html += `<div class="participant">
+                        <strong>${p.nombre}</strong><br>
+                        Tel: ${p.telefono}<br>
+                        Distrito: ${p.distrito}<br>
+                        <small>${p.fecha}</small>
+                    </div>`;
                 });
             });
 
-            container.innerHTML = html || "<p>No hay registros aún.</p>";
+            container.innerHTML = html || "<p>No hay registros.</p>";
         }
 
         function exportar() {
             let csv = "Distrito,Nombre,Teléfono,Fecha\n";
-            data.forEach(p => {
-                csv += `"\( {p.distrito}"," \){p.nombre}","\( {p.telefono}"," \){p.fecha}"\n`;
-            });
+            data.forEach(p => csv += `"\( {p.distrito}"," \){p.nombre}","\( {p.telefono}"," \){p.fecha}"\n`);
             const blob = new Blob([csv], {type: 'text/csv'});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'asistentes_federacion_golfo.csv';
+            a.download = 'asistentes.csv';
             a.click();
         }
     </script>
