@@ -120,38 +120,4 @@
                     <div class="participant">
                         <strong>${p.nombre}</strong><br>
                         Distrito: ${p.distrito}<br>
-                        Tel: ${p.telefono}<br>
-                        Código: ${p.codigo}<br>
-                        Registrado: ${p.fechaRegistro}<br>
-                        ${p.checkin ? `Check-in: ${p.checkinFecha}` : '⏳ Sin check-in'}
-                        <button class="delete-btn" onclick="eliminar(${index})">Eliminar</button>
-                    </div>`;
-            });
-
-            container.innerHTML = html || "<p>No hay registros.</p>";
-        }
-
-        function eliminar(index) {
-            if (confirm("¿Eliminar este registro?")) {
-                data.splice(index, 1);
-                localStorage.setItem('viajeFG', JSON.stringify(data));
-                verLista();
-            }
-        }
-
-        function exportar() {
-            let csv = "Nombre,Distrito,Teléfono,Código,Check-in,Fecha Check-in,Fecha Registro\n";
-            data.forEach(p => {
-                csv += `"\( {p.nombre}"," \){p.distrito}","\( {p.telefono}"," \){p.codigo}","\( {p.checkin ? 'Sí' : 'No'}"," \){p.checkinFecha || '-'}","${p.fechaRegistro}"\n`;
-            });
-            const blob = new Blob([csv], {type: 'text/csv'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'asistentes_viaje.csv';
-            a.click();
-        }
-
-        showTab(0);
-    </script>
-</body>
-</html>
+                        Tel: ${
