@@ -4,54 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viaje Seguro - Federación del Golfo</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
-        body {font-family: Arial, sans-serif; margin:0; padding:20px; background: linear-gradient(135deg, #667eea, #764ba2);}
-        .container {max-width: 900px; margin:auto; background:white; border-radius:15px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3);}
-        h1 {text-align:center; color:#4a6cf7;}
-        input, select, button {padding:12px; margin:8px 0; width:100%; border-radius:8px; font-size:16px;}
+        body {font-family: Arial, sans-serif; margin:0; padding:0; background: linear-gradient(135deg, #667eea, #764ba2);}
+        .container {max-width: 900px; margin:20px auto; background:white; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+        header {background:#4a6cf7; color:white; padding:20px; text-align:center; border-radius:15px 15px 0 0;}
+        .tabs {display:flex; background:#f8f9fa;}
+        .tab {flex:1; padding:15px; text-align:center; cursor:pointer; font-weight:bold;}
+        .tab.active {background:#4a6cf7; color:white;}
+        .card {padding:25px;}
+        input, button {padding:12px; margin:8px 0; width:100%; border-radius:8px; font-size:16px;}
         button {background:#4a6cf7; color:white; border:none; cursor:pointer;}
         button.success {background:#28a745;}
-        .card {background:#f8f9fa; padding:20px; border-radius:12px; margin:15px 0;}
-        .participant {padding:15px; background:white; margin:10px 0; border-radius:10px;}
+        .participant {padding:15px; background:#f8f9fa; margin:10px 0; border-radius:10px;}
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚍 Viaje Seguro - Federación del Golfo</h1>
+        <header>
+            <h1>🚍 Viaje Seguro</h1>
+            <p>Federación del Golfo</p>
+        </header>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab(0)">Registro</div>
+            <div class="tab" onclick="showTab(1)">Check-in</div>
+            <div class="tab" onclick="showTab(2)">Lista</div>
+        </div>
 
         <!-- Registro -->
-        <div class="card">
+        <div id="tab0" class="card">
             <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="Nombre completo">
             <input type="tel" id="telefono" placeholder="Teléfono">
-            <select id="distrito">
-                <option value="">Selecciona Distrito</option>
-                <option value="Benito Juárez">Benito Juárez</option>
-                <option value="Coyoacán">Coyoacán</option>
-                <option value="Álvaro Obregón">Álvaro Obregón</option>
-                <option value="Miguel Hidalgo">Miguel Hidalgo</option>
-                <option value="Cuauhtémoc">Cuauhtémoc</option>
-                <option value="Iztapalapa">Iztapalapa</option>
-                <option value="Gustavo A. Madero">Gustavo A. Madero</option>
-                <option value="Otro">Otro</option>
-            </select>
+            <input type="text" id="distrito" placeholder="Distrito (ej: Coyoacán)">
             <button onclick="registrar()" class="success">Registrarme</button>
         </div>
 
         <!-- Check-in -->
-        <div class="card">
-            <h2>Check-in (Ingresa tu código)</h2>
-            <input type="text" id="codigoCheck" placeholder="Ingresa tu código">
-            <button onclick="checkin()" class="success">Hacer Check-in</button>
+        <div id="tab1" class="card" style="display:none">
+            <h2>Check-in</h2>
+            <input type="text" id="codigo" placeholder="Ingresa tu código de 4 dígitos" maxlength="4">
+            <button onclick="hacerCheckin()" class="success">Confirmar Asistencia</button>
         </div>
 
-        <!-- Lista Organizador -->
-        <div class="card">
-            <h2>Lista (Organizador)</h2>
-            <input type="password" id="pass" placeholder="Contraseña" style="width:70%">
+        <!-- Lista -->
+        <div id="tab2" class="card" style="display:none">
+            <h2>Lista de Asistentes</h2>
+            <input type="password" id="pass" placeholder="Contraseña organizador">
             <button onclick="verLista()">Ver Lista</button>
-            <div id="lista"></div>
+            <div id="lista" style="margin-top:20px;"></div>
             <button onclick="exportar()" class="success" style="margin-top:10px">Exportar Excel</button>
         </div>
     </div>
@@ -59,32 +60,47 @@
     <script>
         let data = JSON.parse(localStorage.getItem('viajeFG')) || [];
 
+        function showTab(n) {
+            document.querySelectorAll('.card').forEach((c, i) => c.style.display = i === n ? 'block' : 'none');
+            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
+        }
+
         function registrar() {
             const nombre = document.getElementById('nombre').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
-            const distrito = document.getElementById('distrito').value;
-            
-            if (!nombre || !distrito) return alert("Nombre y Distrito obligatorios");
+            const distrito = document.getElementById('distrito').value.trim();
 
-            const codigo = "FG" + Date.now().toString().slice(-6);
+            if (!nombre || !distrito) return alert("Nombre y Distrito son obligatorios");
 
-            data.push({nombre, telefono: telefono || "-", distrito, codigo, checkin: false, fecha: new Date().toLocaleString()});
+            const codigo = Math.floor(1000 + Math.random() * 9000); // Código de 4 dígitos
+
+            data.push({
+                nombre,
+                telefono: telefono || "-",
+                distrito,
+                codigo,
+                checkin: false,
+                fecha: new Date().toLocaleString()
+            });
+
             localStorage.setItem('viajeFG', JSON.stringify(data));
+            alert(`Registro exitoso!\nTu código es: ${codigo}`);
             
-            alert(`¡Registro exitoso!\nTu código es: ${codigo}`);
             document.getElementById('nombre').value = '';
             document.getElementById('telefono').value = '';
+            document.getElementById('distrito').value = '';
         }
 
-        function checkin() {
-            const codigo = document.getElementById('codigoCheck').value.trim();
-            const persona = data.find(p => p.codigo === codigo);
+        function hacerCheckin() {
+            const codigo = document.getElementById('codigo').value.trim();
+            const persona = data.find(p => p.codigo == codigo);
             if (persona) {
                 persona.checkin = true;
                 localStorage.setItem('viajeFG', JSON.stringify(data));
                 alert(`✅ Check-in exitoso para ${persona.nombre}`);
+                document.getElementById('codigo').value = '';
             } else {
-                alert("Código inválido");
+                alert("Código incorrecto");
             }
         }
 
@@ -92,28 +108,37 @@
             if (document.getElementById('pass').value !== "federacion2026") {
                 return alert("Contraseña incorrecta");
             }
-            const div = document.getElementById('lista');
-            let html = `<p>Total: ${data.length}</p>`;
+
+            const container = document.getElementById('lista');
+            let html = `<p><strong>Total registrados: ${data.length}</strong></p>`;
+
             data.forEach(p => {
-                html += `<div class="participant">
-                    <strong>\( {p.nombre}</strong> ( \){p.distrito})<br>
-                    Tel: ${p.telefono}<br>
-                    Código: ${p.codigo}<br>
-                    Estado: ${p.checkin ? '✅ Presente' : '⏳ Pendiente'}
-                </div>`;
+                html += `
+                    <div class="participant">
+                        <strong>${p.nombre}</strong><br>
+                        Distrito: ${p.distrito}<br>
+                        Tel: ${p.telefono}<br>
+                        Código: ${p.codigo}<br>
+                        Estado: ${p.checkin ? '✅ Presente' : '⏳ Pendiente'}
+                    </div>`;
             });
-            div.innerHTML = html;
+
+            container.innerHTML = html || "<p>No hay registros.</p>";
         }
 
         function exportar() {
             let csv = "Nombre,Distrito,Teléfono,Código,Check-in,Fecha\n";
-            data.forEach(p => csv += `"\( {p.nombre}"," \){p.distrito}","\( {p.telefono}"," \){p.codigo}","\( {p.checkin ? 'Sí' : 'No'}"," \){p.fecha}"\n`);
+            data.forEach(p => {
+                csv += `"\( {p.nombre}"," \){p.distrito}","\( {p.telefono}"," \){p.codigo}","\( {p.checkin ? 'Sí' : 'No'}"," \){p.fecha}"\n`;
+            });
             const blob = new Blob([csv], {type: 'text/csv'});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = 'asistentes.csv';
             a.click();
         }
+
+        showTab(0);
     </script>
 </body>
 </html>
