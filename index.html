@@ -5,21 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viaje Seguro - Federación del Golfo</title>
     <style>
-        body {font-family: Arial, sans-serif; margin:0; padding:0; background: linear-gradient(135deg, #667eea, #764ba2);}
-        .container {max-width: 900px; margin:20px auto; background:white; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.3);}
-        header {background:#4a6cf7; color:white; padding:20px; text-align:center; border-radius:15px 15px 0 0;}
-        .tabs {display:flex; background:#f8f9fa;}
-        .tab {flex:1; padding:15px; text-align:center; cursor:pointer; font-weight:bold;}
-        .tab.active {background:#4a6cf7; color:white;}
-        .card {padding:25px;}
-        input, button {padding:12px; margin:8px 0; width:100%; border-radius:8px; font-size:16px;}
-        button {background:#4a6cf7; color:white; border:none; cursor:pointer;}
-        button.success {background:#28a745;}
-        .participant {padding:15px; background:#f8f9fa; margin:10px 0; border-radius:10px; display:flex; justify-content:space-between; align-items:center;}
-        .status {padding:6px 14px; border-radius:20px; font-weight:bold;}
-        .verde {background:#d4edda; color:#155724;}
-        .rojo {background:#f8d7da; color:#721c24;}
-        .distrito-header {background:#e3f2fd; padding:12px; margin:15px 0 10px; border-radius:8px; font-weight:bold;}
+        body {
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        header {
+            background: #4a6cf7; 
+            color: white; 
+            padding: 20px; 
+            text-align: center;
+        }
+        header h1 { margin: 0; font-size: 24px; }
+        .tabs { display: flex; background: #f8f9fa; border-bottom: 1px solid #ddd; }
+        .tab { 
+            flex: 1; 
+            padding: 15px; 
+            text-align: center; 
+            cursor: pointer; 
+            font-weight: bold; 
+            color: #555;
+            transition: background 0.3s;
+        }
+        .tab:hover { background: #f1f1f1; }
+        .tab.active { background: #4a6cf7; color: white; }
+        .card { padding: 25px; display: none; }
+        .card.active { display: block; }
+        
+        /* Ajuste crucial para evitar desbordamientos */
+        input, button { 
+            padding: 12px; 
+            margin: 8px 0; 
+            width: 100%; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            box-sizing: border-box; 
+        }
+        input { border: 1px solid #ccc; }
+        button { background: #4a6cf7; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { opacity: 0.9; }
+        button.success { background: #28a745; }
+        
+        .participant { 
+            padding: 15px; 
+            background: #f8f9fa; 
+            margin: 10px 0; 
+            border-radius: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-left: 5px solid #ccc;
+        }
+        .status { padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .verde { background: #d4edda; color: #155724; border-left-color: #28a745; }
+        .rojo { background: #f8d7da; color: #721c24; border-left-color: #dc3545; }
+        .distrito-header { background: #e3f2fd; padding: 12px; margin: 20px 0 10px; border-radius: 8px; font-weight: bold; color: #0d47a1; }
     </style>
 </head>
 <body>
@@ -34,7 +84,7 @@
             <div class="tab" onclick="showTab(2)">Lista</div>
         </div>
 
-        <div id="tab0" class="card">
+        <div id="tab0" class="card active">
             <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="Nombre completo">
             <input type="tel" id="telefono" placeholder="Teléfono">
@@ -42,18 +92,18 @@
             <button onclick="registrar()" class="success">Registrarme</button>
         </div>
 
-        <div id="tab1" class="card" style="display:none">
+        <div id="tab1" class="card">
             <h2>Check-in</h2>
             <input type="text" id="codigo" placeholder="Código de 4 dígitos" maxlength="4">
             <button onclick="hacerCheckin()" class="success">Confirmar Asistencia</button>
         </div>
 
-        <div id="tab2" class="card" style="display:none">
+        <div id="tab2" class="card">
             <h2>Lista por Distrito</h2>
             <input type="password" id="pass" placeholder="Contraseña">
             <button onclick="verLista()">Ver Lista</button>
             <div id="lista" style="margin-top:20px;"></div>
-            <button onclick="exportar()" class="success" style="margin-top:10px">Exportar Excel</button>
+            <button onclick="exportar()" class="success" style="margin-top:10px">Exportar Excel (CSV)</button>
         </div>
     </div>
 
@@ -61,21 +111,37 @@
         let data = JSON.parse(localStorage.getItem('viajeFG')) || [];
 
         function showTab(n) {
-            document.querySelectorAll('.card').forEach((c, i) => c.style.display = i === n ? 'block' : 'none');
-            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
+            document.querySelectorAll('.card').forEach((c, i) => {
+                c.classList.toggle('active', i === n);
+            });
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                t.classList.toggle('active', i === n);
+            });
         }
 
         function registrar() {
             const nombre = document.getElementById('nombre').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
             const distrito = document.getElementById('distrito').value.trim();
+            
             if (!nombre || !distrito) return alert("Nombre y Distrito son obligatorios");
 
             const codigo = Math.floor(1000 + Math.random() * 9000);
 
-            data.push({nombre, telefono: telefono || "-", distrito, codigo, checkin: false, checkinFecha: null, fechaRegistro: new Date().toLocaleString()});
+            data.push({
+                nombre, 
+                telefono: telefono || "-", 
+                distrito, 
+                codigo, 
+                checkin: false, 
+                checkinFecha: null, 
+                fechaRegistro: new Date().toLocaleString()
+            });
+            
             localStorage.setItem('viajeFG', JSON.stringify(data));
             alert(`¡Registro exitoso!\nTu código es: ${codigo}`);
+            
+            // Limpiar campos
             document.getElementById('nombre').value = '';
             document.getElementById('telefono').value = '';
             document.getElementById('distrito').value = '';
@@ -83,11 +149,16 @@
 
         function hacerCheckin() {
             const codigo = document.getElementById('codigo').value.trim();
+            if(!codigo) return alert("Por favor ingresa un código.");
+
             const persona = data.find(p => p.codigo == codigo);
             if (persona) {
+                if (persona.checkin) return alert("Este código ya realizó su check-in.");
+                
                 persona.checkin = true;
                 persona.checkinFecha = new Date().toLocaleString();
                 localStorage.setItem('viajeFG', JSON.stringify(data));
+                
                 alert(`✅ Check-in exitoso para ${persona.nombre}`);
                 document.getElementById('codigo').value = '';
             } else {
@@ -96,9 +167,15 @@
         }
 
         function verLista() {
+            // Nota: Recuerda cambiar esto en producción por seguridad
             if (document.getElementById('pass').value !== "federacion2026") return alert("Contraseña incorrecta");
 
             const container = document.getElementById('lista');
+            if (data.length === 0) {
+                container.innerHTML = "<p>No hay registros de asistentes aún.</p>";
+                return;
+            }
+
             let html = `<p><strong>Total: ${data.length} participantes</strong></p>`;
 
             const porDistrito = {};
@@ -108,39 +185,45 @@
             });
 
             Object.keys(porDistrito).sort().forEach(dist => {
-                html += `<div class="distrito-header">\( {dist} ( \){porDistrito[dist].length})</div>`;
+                html += `<div class="distrito-header">${dist} (${porDistrito[dist].length})</div>`;
                 porDistrito[dist].forEach(p => {
                     html += `
-                        <div class="participant">
+                        <div class="participant ${p.checkin ? 'verde' : 'rojo'}">
                             <div>
                                 <strong>${p.nombre}</strong><br>
-                                Tel: ${p.telefono} | Código: ${p.codigo}
+                                <span style="font-size:14px; color:#555;">Tel: ${p.telefono} | Código: ${p.codigo}</span>
                             </div>
-                            <div class="status ${p.checkin ? 'verde' : 'rojo'}">
+                            <div class="status">
                                 ${p.checkin ? '✅ Presente' : '❌ Pendiente'}
                             </div>
                         </div>`;
                 });
             });
 
-            container.innerHTML = html || "<p>No hay registros.</p>";
+            container.innerHTML = html;
         }
 
         function exportar() {
-            let csv = "Nombre,Distrito,Teléfono,Código,Check-in,Fecha_Check-in,Fecha_Registro\n";
+            if (data.length === 0) return alert("No hay datos para exportar");
+            
+            // BOM para que Excel detecte los acentos correctamente en español
+            let csv = "\uFEFFNombre,Distrito,Teléfono,Código,Check-in,Fecha_Check-in,Fecha_Registro\n";
+            
             data.forEach(p => {
-                csv += `"\( {p.nombre}"," \){p.distrito}","\( {p.telefono}"," \){p.codigo}","\( {p.checkin ? 'Sí' : 'No'}"," \){p.checkinFecha || ''}","${p.fechaRegistro}"\n`;
+                csv += `"${p.nombre}","${p.distrito}","${p.telefono}","${p.codigo}","${p.checkin ? 'Sí' : 'No'}","${p.checkinFecha || ''}","${p.fechaRegistro}"\n`;
             });
-            const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csv);
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
             link.setAttribute("download", "asistentes_viaje.csv");
+            link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
-
-        showTab(0);
     </script>
 </body>
 </html>
