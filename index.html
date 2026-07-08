@@ -444,7 +444,6 @@
 
         #escanner-bloqueado { text-align: center; padding: 40px 10px; color: var(--text-muted); }
 
-        /* Estilo para las etiquetas de control registradas en la lista */
         .badge-checkpoint {
             display: inline-flex;
             align-items: center;
@@ -495,6 +494,7 @@
             
             <select id="distrito">
                 <option value="" disabled selected>SELECCIONA TU DISTRITO</option>
+                <option value="STAFF">⭐ STAFF</option>
                 <option value="ALLENDE">ALLENDE</option>
                 <option value="BARRANCAS">BARRANCAS</option>
                 <option value="CENTRAL">CENTRAL</option>
@@ -630,7 +630,8 @@
         let nombreUltimoRegistro = "boleto";
         let isAdminAuthenticated = false;
 
-        const distritosValidos = ["ALLENDE", "BARRANCAS", "CENTRAL", "CERRITOS", "COATZA 1", "COATZA 2", "COATZA 3", "COATZA 4", "COATZA 5", "COATZA 6", "MUNDO NUEVO", "NANCHITAL 1", "NANCHITAL 2", "NANCHITAL 3"];
+        // Se agrega STAFF al array de validaciones internas
+        const distritosValidos = ["STAFF", "ALLENDE", "BARRANCAS", "CENTRAL", "CERRITOS", "COATZA 1", "COATZA 2", "COATZA 3", "COATZA 4", "COATZA 5", "COATZA 6", "MUNDO NUEVO", "NANCHITAL 1", "NANCHITAL 2", "NANCHITAL 3"];
 
         function showTab(n) {
             const cards = document.querySelectorAll('.card');
@@ -928,7 +929,6 @@
                         const puntosListados = Object.keys(historial);
                         const totalPuntosPersona = puntosListados.length;
                         
-                        // SECCIÓN DE HISTORIAL DETALLADO ACTUALIZADO
                         let detallePuntos = "";
                         puntosListados.sort().forEach(punto => {
                             let icono = "📍";
@@ -937,7 +937,6 @@
                             if(punto.includes("Cañón")) icono = "⛰️";
                             if(punto.includes("Plaza")) icono = "🛒";
                             
-                            // Se genera la etiqueta HTML explícita uniendo Punto de Control + Hora
                             detallePuntos += `
                                 <span class="badge-checkpoint">
                                     ${icono} ${punto}: <b>${historial[punto]}</b>
