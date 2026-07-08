@@ -3,27 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viaje Seguro - Federación del Golfo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Imparables - Federación del Golfo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     
+    <!-- Scripts de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     
+    <!-- Librería del Escáner QR integrada -->
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
         :root {
-            --primary-bg: #10121a;
-            --container-bg: #1a1e29;
-            --primary-accent: #6c5ce7;
-            --secondary-accent: #00cec9;
+            --primary-bg: #0b0f19; /* Azul marino ultra profundo, casi negro */
+            --container-bg: #131927; /* Azul contenedor firme */
+            --primary-accent: #f5a623; /* Oro/Amarillo Imparables */
+            --secondary-accent: #ff6b4a; /* Naranja Fuego */
             --success-color: #00b894;
             --error-color: #ff7675;
-            --text-main: #ecf0f1;
-            --text-muted: #b0bec5;
+            --text-main: #ffffff;
+            --text-muted: #a4b0be;
             --font-main: 'Inter', sans-serif;
-            --radius-main: 16px;
-            --radius-tab: 10px;
+            --radius-main: 20px;
+            --radius-tab: 12px;
         }
 
         body {
@@ -31,9 +33,10 @@
             margin: 0;
             padding: 20px;
             background-color: var(--primary-bg);
+            /* Degradado de fondo inspirado en la antorcha y energía del logo */
             background-image: 
-                radial-gradient(at 10% 10%, rgba(108, 92, 231, 0.15) 0px, transparent 50%),
-                radial-gradient(at 90% 90%, rgba(0, 206, 201, 0.1) 0px, transparent 50%);
+                radial-gradient(at 50% 0%, rgba(245, 166, 35, 0.15) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(255, 107, 74, 0.08) 0px, transparent 40%);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
@@ -46,14 +49,14 @@
             max-width: 750px;
             background-color: var(--container-bg);
             border-radius: var(--radius-main);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 2px solid rgba(245, 166, 35, 0.1); /* Borde dorado sutil */
         }
 
         header {
-            background-color: rgba(108, 92, 231, 0.1);
-            padding: 30px 20px;
+            background: linear-gradient(180deg, rgba(245, 166, 35, 0.08) 0%, rgba(0,0,0,0) 100%);
+            padding: 35px 20px 25px;
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             display: flex;
@@ -63,58 +66,182 @@
         }
 
         .event-logo {
-            max-width: 220px;
+            max-width: 260px;
             height: auto;
             object-fit: contain;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6));
+            animation: floating 3s ease-in-out infinite;
         }
 
-        header h1 { margin: 0; font-size: 22px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
 
-        .tabs { display: flex; gap: 5px; padding: 15px; background-color: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-muted); border-radius: var(--radius-tab); transition: all 0.2s ease; }
-        .tab:hover { background-color: rgba(255,255,255,0.05); color: var(--text-main); }
-        .tab.active { background-color: var(--primary-accent); color: white; box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3); }
+        header h1 { 
+            margin: 0; 
+            font-size: 20px; 
+            font-weight: 900; 
+            color: var(--primary-accent); 
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .tabs { 
+            display: flex; 
+            gap: 8px; 
+            padding: 15px; 
+            background-color: rgba(0, 0, 0, 0.2); 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+        }
+        
+        .tab { 
+            flex: 1; 
+            padding: 14px; 
+            text-align: center; 
+            cursor: pointer; 
+            font-weight: 700; 
+            font-size: 14px; 
+            color: var(--text-muted); 
+            border-radius: var(--radius-tab); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid transparent;
+        }
+        .tab:hover { 
+            background-color: rgba(245, 166, 35, 0.05); 
+            color: var(--primary-accent); 
+        }
+        .tab.active { 
+            background-color: var(--primary-accent); 
+            color: #0b0f19; 
+            box-shadow: 0 6px 15px rgba(245, 166, 35, 0.3);
+            font-weight: 900;
+        }
 
         .card { padding: 35px 30px; display: none; }
-        h2 { margin-top: 0; margin-bottom: 25px; font-size: 22px; font-weight: 600; color: var(--text-main); }
-
-        input { padding: 16px; margin: 10px 0; width: 100%; border-radius: 10px; font-size: 16px; box-sizing: border-box; background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); transition: border-color 0.2s; }
-        input:focus { outline: none; border-color: var(--primary-accent); box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2); }
-
-        button { padding: 16px; margin: 20px 0 10px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        button.primary { background-color: var(--primary-accent); color: white; }
-        button.primary:hover { background-color: #5b4bc4; }
-        button.success { background-color: var(--success-color); color: white; }
-        button.success:hover { background-color: #00a383; }
         
-        button.download { background-color: var(--secondary-accent); color: #10121a; margin-top: 10px; }
-        button.download:hover { background-color: #00b4b1; }
+        h2 { 
+            margin-top: 0; 
+            margin-bottom: 25px; 
+            font-size: 22px; 
+            font-weight: 700; 
+            color: var(--text-main);
+            border-left: 4px solid var(--secondary-accent);
+            padding-left: 12px;
+        }
 
-        #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 12px; overflow: hidden; border: 2px dashed rgba(255,255,255,0.1); background: #000; }
+        input { 
+            padding: 16px; 
+            margin: 10px 0; 
+            width: 100%; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            box-sizing: border-box; 
+            background-color: rgba(0, 0, 0, 0.25); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            color: var(--text-main); 
+            transition: all 0.2s; 
+        }
+        input:focus { 
+            outline: none; 
+            border-color: var(--primary-accent); 
+            box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.15); 
+            background-color: rgba(0, 0, 0, 0.4);
+        }
 
-        .distritos-tabs-container { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .distrito-tab { padding: 8px 14px; background-color: rgba(255,255,255,0.05); color: var(--text-muted); border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .distrito-tab.active { background-color: var(--secondary-accent); color: #10121a; font-weight: 700; }
+        button { 
+            padding: 16px; 
+            margin: 20px 0 10px; 
+            width: 100%; 
+            border-radius: 12px; 
+            font-size: 15px; 
+            font-weight: 900; 
+            border: none; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        
+        button.primary { 
+            background: linear-gradient(135deg, var(--primary-accent) 0%, #d48a17 100%); 
+            color: #0b0f19; 
+        }
+        button.primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(245,166,35,0.3); }
+        
+        button.success { 
+            background: linear-gradient(135deg, var(--secondary-accent) 0%, #e04d2b 100%); 
+            color: white; 
+        }
+        button.success:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,107,74,0.3); }
+        
+        button.download { 
+            background-color: transparent; 
+            color: var(--primary-accent); 
+            border: 2px solid var(--primary-accent);
+            margin-top: 15px; 
+        }
+        button.download:hover { background-color: var(--primary-accent); color: #0b0f19; }
+
+        #reader { 
+            width: 100%; 
+            max-width: 400px; 
+            margin: 0 auto; 
+            border-radius: 16px; 
+            overflow: hidden; 
+            border: 3px dashed var(--primary-accent); 
+            background: #000; 
+        }
+
+        .distritos-tabs-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .distrito-tab { 
+            padding: 8px 16px; 
+            background-color: rgba(255,255,255,0.05); 
+            color: var(--text-muted); 
+            border-radius: 20px; 
+            font-size: 13px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .distrito-tab.active { 
+            background-color: rgba(245, 166, 35, 0.15); 
+            color: var(--primary-accent); 
+            border-color: var(--primary-accent);
+        }
 
         .distrito-panel { display: none; }
         .distrito-panel.active { display: block; animation: fadeIn 0.3s ease; }
 
-        .participant { padding: 18px; background-color: rgba(255,255,255,0.03); margin: 12px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.03); }
+        .participant { 
+            padding: 18px; 
+            background-color: rgba(0, 0, 0, 0.2); 
+            margin: 12px 0; 
+            border-radius: 14px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border: 1px solid rgba(255,255,255,0.03); 
+        }
         .participant-actions { display: flex; align-items: center; gap: 15px; }
-        .participant strong { font-size: 16px; color: var(--text-main); }
-        .participant-info-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-        .status { padding: 8px 14px; border-radius: 30px; font-weight: 700; font-size: 12px; }
+        .participant strong { font-size: 16px; color: var(--text-main); letter-spacing: 0.3px; }
+        .participant-info-sub { font-size: 13px; color: var(--text-muted); margin-top: 5px; }
         
-        .verde .status { background-color: rgba(0, 184, 148, 0.15); color: var(--success-color); }
-        .rojo .status { background-color: rgba(255, 118, 117, 0.15); color: var(--error-color); }
-        .time-badge { font-size: 11px; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #fff;}
+        .status { padding: 8px 14px; border-radius: 30px; font-weight: 800; font-size: 11px; letter-spacing: 0.5px; }
+        .verde .status { background-color: rgba(0, 184, 148, 0.15); color: var(--success-color); border: 1px solid rgba(0, 184, 148, 0.2); }
+        .rojo .status { background-color: rgba(255, 118, 117, 0.15); color: var(--error-color); border: 1px solid rgba(255, 118, 117, 0.2); }
+        .time-badge { font-size: 11px; background: rgba(255,255,255,0.12); padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #fff;}
 
         .btn-delete {
             background: rgba(255, 118, 117, 0.1);
             color: var(--error-color);
-            border: 1px solid rgba(255, 118, 117, 0.2);
+            border: 1px solid rgba(255, 118, 117, 0.15);
             padding: 8px 12px;
             border-radius: 8px;
             cursor: pointer;
@@ -126,10 +253,10 @@
         .btn-delete:hover { background: var(--error-color); color: white; }
 
         #qr-resultado-exito { text-align: center; color: var(--success-color); font-weight: bold; font-size: 18px; margin: 15px 0; min-height: 24px; }
-        #loading { display: none; text-align: center; color: var(--secondary-accent); font-weight: bold; margin: 10px 0; }
+        #loading { text-align: center; color: var(--primary-accent); font-weight: bold; margin: 10px 0; display: none;}
         
-        #qr-container { display: none; flex-direction: column; align-items: center; background: rgba(255,255,255,0.02); padding: 20px; margin: 20px auto 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); max-width: 240px; }
-        .qr-box { width: 180px; height: 180px; background: white; padding: 10px; border-radius: 8px; display: flex; justify-content: center; align-items: center; }
+        #qr-container { display: none; flex-direction: column; align-items: center; background: rgba(0,0,0,0.3); padding: 25px; margin: 25px auto 0; border-radius: 16px; border: 1px solid rgba(245,166,35,0.2); max-width: 240px; }
+        .qr-box { width: 180px; height: 180px; background: white; padding: 12px; border-radius: 12px; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .qr-box img { width: 100%; height: 100%; }
 
         #escanner-bloqueado { text-align: center; padding: 40px 10px; color: var(--text-muted); }
@@ -143,6 +270,7 @@
 </head>
 <body>
     <div class="container">
+        <!-- ENCABEZADO CON LOGO MEJORADO -->
         <header>
             <img src="https://raw.githubusercontent.com/federaciondelgolfo/federaciondelgolfo.github.io/main/1000266768.png" alt="Imparables - Federación del Golfo" class="event-logo" onerror="this.src='1000266768.png'">
             <h1>🚍 Viaje Seguro - Federación del Golfo</h1>
@@ -154,8 +282,9 @@
             <div class="tab" onclick="showTab(2)" id="nav-tab2">Lista</div>
         </div>
 
-        <div id="loading">⌛ Procesando con la nube... Por favor espera.</div>
+        <div id="loading">⌛ Conectando con la nube... Por favor espera.</div>
 
+        <!-- REGISTRO -->
         <div id="tab0" class="card" style="display: block;">
             <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="NOMBRE COMPLETO" oninput="this.value = this.value.toUpperCase()">
@@ -171,6 +300,7 @@
             </div>
         </div>
 
+        <!-- CHECK-IN POR CÁMARA -->
         <div id="tab1" class="card">
             <h2>Escáner de Boletos</h2>
             
@@ -187,6 +317,7 @@
             </div>
         </div>
 
+        <!-- LISTA -->
         <div id="tab2" class="card">
             <h2>Lista de Participantes</h2>
             <input type="password" id="pass" placeholder="Contraseña de acceso">
@@ -270,7 +401,7 @@
             }, (error) => {
                 toggleLoading(false);
                 if (error) {
-                    alert("Error en Firebase (Revisa las reglas de seguridad): " + error.message);
+                    alert("Error en Firebase: " + error.message);
                 } else {
                     nombreUltimoRegistro = nombre.replace(/\s+/g, '_');
                     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${codigo}`;
@@ -345,7 +476,7 @@
                 const persona = snapshot.val();
                 if (persona.checkin === "Si") {
                     document.getElementById('qr-resultado-exito').innerHTML = `ℹ️ ${persona.nombre} ya tiene check-in`;
-                    document.getElementById('qr-resultado-exito').style.color = "var(--secondary-accent)";
+                    document.getElementById('qr-resultado-exito').style.color = "var(--primary-accent)";
                 } else {
                     const ahora = new Date();
                     const horaLimpia = ahora.toLocaleDateString('es-MX') + ' ' + ahora.toLocaleTimeString('es-MX');
@@ -359,8 +490,6 @@
                         try { navigator.vibrate(200); } catch(e){}
                     });
                 }
-            }, (error) => {
-                alert("Error de permisos en Firebase al verificar código.");
             });
         }
 
@@ -437,9 +566,6 @@
 
                 tabsContainer.innerHTML = tabsHtml;
                 panelesContainer.innerHTML = panelesHtml;
-            }, (error) => {
-                toggleLoading(false);
-                alert("Error de lectura: Acceso denegado por reglas de Firebase.");
             });
         }
 
@@ -449,9 +575,6 @@
             db.ref('asistentes/' + codigo).remove().then(() => {
                 toggleLoading(false);
                 verLista();
-            }).catch((err) => {
-                toggleLoading(false);
-                alert("Error de borrado: Acceso denegado por reglas de Firebase.");
             });
         }
 
