@@ -6,11 +6,9 @@
     <title>Imparables - Federación del Golfo</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     
-    <!-- Scripts de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     
-    <!-- Librería del Escáner QR integrada -->
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
@@ -131,6 +129,22 @@
             color: var(--text-main);
             border-left: 4px solid var(--secondary-accent);
             padding-left: 12px;
+        }
+
+        .sub-section {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         input { 
@@ -281,15 +295,19 @@
 
         <div id="loading">⌛ Conectando con la nube... Por favor espera.</div>
 
-        <!-- REGISTRO -->
         <div id="tab0" class="card" style="display: block;">
             <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="NOMBRE COMPLETO" oninput="this.value = this.value.toUpperCase()">
             <input type="tel" id="telefono" placeholder="TELÉFONO" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <input type="text" id="distrito" placeholder="DISTRITO" oninput="this.value = this.value.toUpperCase()">
-            <!-- BOTÓN ACTUALIZADO AQUÍ -->
             <button onclick="registrar()" class="success" id="btn-registrar">Registrar y Descargar QR</button>
             
+            <div class="sub-section">
+                <h3>¿Ya te registraste pero perdiste tu QR?</h3>
+                <input type="tel" id="telefono-recuperar" placeholder="INGRESA TU TELÉFONO REGISTRADO" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <button onclick="recuperarQR()" class="primary" id="btn-recuperar" style="margin-top: 10px;">Recuperar mi QR</button>
+            </div>
+
             <div id="qr-container">
                 <div class="qr-box">
                     <img id="qr-ticket" src="" alt="Código QR de Acceso">
@@ -298,7 +316,6 @@
             </div>
         </div>
 
-        <!-- CHECK-IN POR CÁMARA -->
         <div id="tab1" class="card">
             <h2>Escáner de Boletos</h2>
             
@@ -315,7 +332,6 @@
             </div>
         </div>
 
-        <!-- LISTA -->
         <div id="tab2" class="card">
             <h2>Lista de Participantes</h2>
             <input type="password" id="pass" placeholder="Contraseña de acceso">
@@ -373,6 +389,7 @@
         function toggleLoading(show) {
             document.getElementById('loading').style.display = show ? 'block' : 'none';
             document.getElementById('btn-registrar').disabled = show;
+            if(document.getElementById('btn-recuperar')) document.getElementById('btn-recuperar').disabled = show;
         }
 
         function registrar() {
@@ -411,6 +428,51 @@
                     document.getElementById('telefono').value = '';
                     document.getElementById('distrito').value = '';
                 }
+            });
+        }
+
+        // FUNCIÓN NUEVA: RECUPERAR QR POR TELÉFONO
+        function recuperarQR() {
+            const telefonoBuscar = document.getElementById('telefono-recuperar').value.trim();
+
+            if (!telefonoBuscar) {
+                alert("⚠️ Por favor, escribe el teléfono con el que te registraste.");
+                return;
+            }
+
+            toggleLoading(true);
+
+            db.ref('asistentes').once('value', (snapshot) => {
+                toggleLoading(false);
+                let encontrado = false;
+                let codigoAsistente = "";
+                let nombreAsistente = "";
+
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const p = childSnapshot.val();
+                        if (p.telefono === telefonoBuscar) {
+                            encontrado = true;
+                            codigoAsistente = p.codigo;
+                            nombreAsistente = p.nombre;
+                        }
+                    });
+                }
+
+                if (encontrado) {
+                    nombreUltimoRegistro = nombreAsistente.replace(/\s+/g, '_');
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${codigoAsistente}`;
+                    document.getElementById('qr-ticket').src = qrUrl;
+                    document.getElementById('qr-container').style.display = 'flex';
+                    
+                    alert(`✅ ¡QR Recuperado con éxito para: ${nombreAsistente}!`);
+                    document.getElementById('telefono-recuperar').value = '';
+                } else {
+                    alert("❌ No se encontró ningún registro asociado a ese número de teléfono.");
+                }
+            }).catch(err => {
+                toggleLoading(false);
+                alert("Error al buscar en la base de datos: " + err.message);
             });
         }
 
@@ -550,7 +612,6 @@
                         
                         let detalleFechas = "";
                         diasRegistrados.forEach(f => {
-                            // Se concatena la fecha junto a la hora guardada en Firebase
                             detalleFechas += `📅 ${f} (${historial[f]}) `;
                         });
 
