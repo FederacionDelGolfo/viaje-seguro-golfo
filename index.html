@@ -26,30 +26,9 @@
         .container { width: 100%; max-width: 750px; background-color: var(--container-bg); border-radius: var(--radius-main); box-shadow: 0 25px 50px rgba(0,0,0,0.6); overflow: hidden; border: 2px solid rgba(245, 166, 35, 0.1); }
         
         header { background: linear-gradient(180deg, rgba(245, 166, 35, 0.08) 0%, transparent 100%); padding: 35px 20px 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .event-logo { max-width: 240px; height: auto; animation: floating 3s ease-in-out infinite; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6)); }
+        .event-logo { max-width: 260px; height: auto; animation: floating 3s ease-in-out infinite; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6)); }
         @keyframes floating { 0% { transform: translateY(0px); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0px); } }
-        
-        header h1 { 
-            margin: 15px 0 0; 
-            font-size: 26px; 
-            font-weight: 900; 
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: linear-gradient(90deg, #f5a623, #ff6b4a);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 2px 8px rgba(245, 166, 35, 0.2));
-        }
-        header h1 span {
-            display: block;
-            font-size: 13px;
-            font-weight: 700;
-            color: #ffffff;
-            -webkit-text-fill-color: #ffffff;
-            letter-spacing: 4px;
-            margin-top: 5px;
-            opacity: 0.9;
-        }
+        header h1 { margin: 15px 0 0; font-size: 20px; font-weight: 900; color: var(--primary-accent); text-transform: uppercase; }
 
         .tabs { display: flex; gap: 8px; padding: 15px; background-color: rgba(0, 0, 0, 0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .tab { flex: 1; padding: 14px; text-align: center; cursor: pointer; font-weight: 700; color: var(--text-muted); border-radius: 12px; text-transform: uppercase; font-size: 14px; transition: all 0.2s; }
@@ -59,13 +38,19 @@
         input { padding: 16px; margin: 10px 0; width: 100%; border-radius: 12px; background-color: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255,255,255,0.1); color: white; box-sizing: border-box; font-size: 15px; transition: border 0.2s; }
         input:focus { outline: none; border-color: var(--primary-accent); }
         
-        button { padding: 16px; margin: 15px 0 5px; width: 100%; border-radius: 12px; font-weight: 900; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.1s, opacity 0.2s; }
+        button { padding: 16px; margin: 15px 0 5px; width: 100%; border-radius: 12px; font-weight: 900; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.1s; }
         button:active { transform: scale(0.98); }
         .success { background: linear-gradient(135deg, #ff6b4a 0%, #e04d2b 100%); color: white; }
         .primary { background: var(--primary-accent); color: #0b0f19; }
         .download { background: transparent; color: var(--primary-accent); border: 2px solid var(--primary-accent); margin-top: 15px; }
         
-        .participant { padding: 18px; background: rgba(0,0,0,0.2); margin: 12px 0; border-radius: 14px; border-left: 4px solid var(--primary-accent); border-top: 1px solid rgba(255,255,255,0.02); border-right: 1px solid rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.02); }
+        /* CONTADORES Y MÉTRICAS */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-card div:first-child { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card div:last-child { font-size: 24px; font-weight: 900; color: var(--primary-accent); margin-top: 5px; }
+
+        .participant { padding: 18px; background: rgba(0,0,0,0.2); margin: 12px 0; border-radius: 14px; border-left: 4px solid var(--primary-accent); border-top: 1px solid rgba(255,255,255,0.02); }
         .participant-meta { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
         .participant-times { color: var(--primary-accent); font-size: 12px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; }
     </style>
@@ -74,7 +59,7 @@
     <div class="container">
         <header>
             <img src="https://raw.githubusercontent.com/federaciondelgolfo/federaciondelgolfo.github.io/main/1000266768.png" alt="Imparables" class="event-logo">
-            <h1>Federación del Golfo<span>IMPULSANDO EL DESTINO</span></h1>
+            <h1>🚍 Viaje Seguro - Federación del Golfo</h1>
         </header>
 
         <div class="tabs">
@@ -107,9 +92,28 @@
 
         <!-- TAB LISTA -->
         <div id="tab2" class="card">
-            <input type="password" id="pass" placeholder="Contraseña de administrador">
-            <button onclick="verLista()" class="primary">Ver Lista</button>
-            <div id="lista_container" style="margin-top:20px; display:none;"></div>
+            <div id="auth-box">
+                <input type="password" id="pass" placeholder="Contraseña de administrador">
+                <button onclick="verLista()" class="primary">Ver Lista</button>
+            </div>
+            
+            <div id="lista_admin_content" style="display:none;">
+                <!-- Métricas en tiempo real -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div>Registrados</div>
+                        <div id="stat-total">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>Abordo (Hoy)</div>
+                        <div id="stat-checks">0</div>
+                    </div>
+                </div>
+                
+                <!-- Buscador en tiempo real -->
+                <input type="text" id="buscador-lista" placeholder="🔍 Buscar por nombre, distrito o celular..." oninput="filtrarLista()">
+                <div id="lista_container" style="margin-top:10px;"></div>
+            </div>
         </div>
     </div>
 
@@ -120,12 +124,12 @@
         
         let html5QrcodeScanner = null;
         let nombreParaArchivoQR = "ticket";
+        let listadoAsistentesCache = []; // Almacenamiento local temporal para el buscador rápido
 
         function showTab(n) {
             document.querySelectorAll('.card').forEach((c, i) => c.style.display = (i === n) ? 'block' : 'none');
             document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
             
-            // Apaga la cámara si sales de la pestaña escáner
             if (n !== 1 && html5QrcodeScanner) {
                 html5QrcodeScanner.stop().then(() => { html5QrcodeScanner = null; }).catch(err => console.log(err));
                 document.getElementById('qr-resultado-exito').innerText = "";
@@ -138,7 +142,7 @@
             const distrito = document.getElementById('distrito').value.trim();
 
             if (!nombre || !telefono || !distrito) {
-                return alert("⚠️ Por favor rellena todos los campos obligatorios.");
+                return alert("⚠️ Por favor rellena todos los campos.");
             }
 
             const codigo = String(Math.floor(1000 + Math.random() * 9000));
@@ -148,12 +152,11 @@
                 document.getElementById('qr-ticket').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${codigo}`;
                 document.getElementById('qr-container').style.display = 'block';
                 
-                // Limpieza de inputs
                 document.getElementById('nombre').value = "";
                 document.getElementById('telefono').value = "";
                 document.getElementById('distrito').value = "";
                 alert(`✅ ${nombre} registrado con éxito.`);
-            }).catch(err => alert("Error al conectar con la base de datos: " + err));
+            }).catch(err => alert("Error en base de datos: " + err));
         }
 
         function descargarQR() {
@@ -163,7 +166,7 @@
                 link.href = URL.createObjectURL(blob);
                 link.download = `QR_${nombreParaArchivoQR}.png`;
                 link.click();
-            }).catch(() => alert("No se pudo realizar la descarga. Intente nuevamente."));
+            }).catch(() => alert("No se pudo descargar. Intentelo de nuevo."));
         }
 
         function iniciarEscaneo() {
@@ -179,7 +182,7 @@
                     const cleanCode = codigoScaneado.trim();
                     db.ref('asistentes/' + cleanCode).once('value', (snap) => {
                         if (!snap.exists()) {
-                            document.getElementById('qr-resultado-exito').innerHTML = "<span style='color:var(--secondary-accent)'>❌ Código inválido o no registrado.</span>";
+                            document.getElementById('qr-resultado-exito').innerHTML = "<span style='color:var(--secondary-accent)'>❌ Código inválido.</span>";
                             return;
                         }
                         
@@ -192,13 +195,11 @@
                         
                         db.ref('asistentes/' + cleanCode + '/checkins').set(records).then(() => {
                             document.getElementById('qr-resultado-exito').innerHTML = `🎉 CHECK-IN OK: <br> ${p.nombre} (${ahora})`;
-                            
-                            // Efecto sonoro nativo opcional mediante vibración del móvil
                             if (navigator.vibrate) navigator.vibrate(150);
                         });
                     });
                 },
-                () => {} // Ignorar errores de escaneo continuo por frames
+                () => {}
             ).catch(err => {
                 document.getElementById('qr-resultado-exito').innerText = "⚠️ Error de permisos de cámara.";
                 html5QrcodeScanner = null;
@@ -208,28 +209,62 @@
         function verLista() {
             if (document.getElementById('pass').value !== "federacion2026") return alert("Contraseña incorrecta");
             
-            db.ref('asistentes').once('value', (snap) => {
-                let html = "";
-                if (!snap.exists()) {
-                    document.getElementById('lista_container').innerHTML = "<p style='color:var(--text-muted)'>No hay usuarios registrados</p>";
-                    return;
-                }
-                
+            document.getElementById('auth-box').style.display = 'none';
+            document.getElementById('lista_admin_content').style.display = 'block';
+            
+            // Escucha activa de cambios en tiempo real
+            db.ref('asistentes').on('value', (snap) => {
+                listadoAsistentesCache = [];
+                let totalRegistrados = 0;
+                let totalAbordoHoy = 0;
+                const hoy = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
+
                 snap.forEach(s => {
                     const p = s.val();
-                    const checks = p.checkins || {};
-                    let logs = Object.entries(checks).map(([fecha, hora]) => `<span style="display:block; margin: 3px 0;">📅 ${fecha} — ⏰ ${hora}</span>`).join('');
+                    listadoAsistentesCache.push(p);
+                    totalRegistrados++;
                     
-                    html += `
-                        <div class="participant">
-                            <strong>${p.nombre}</strong>
-                            <div class="participant-meta">Distrito: ${p.distrito || 'S/D'} | Tel: ${p.telefono || 'S/T'}</div>
-                            <div class="participant-times">${logs || '❌ Sin asistencias en el viaje.'}</div>
-                        </div>`;
+                    if (p.checkins && p.checkins[hoy]) {
+                        totalAbordoHoy++;
+                    }
                 });
-                document.getElementById('lista_container').innerHTML = html;
-                document.getElementById('lista_container').style.display = 'block';
+
+                document.getElementById('stat-total').innerText = totalRegistrados;
+                document.getElementById('stat-checks').innerText = totalAbordoHoy;
+                
+                renderizarListaFiltrada(listadoAsistentesCache);
             });
+        }
+
+        function renderizarListaFiltrada(lista) {
+            let html = "";
+            if (lista.length === 0) {
+                document.getElementById('lista_container').innerHTML = "<p style='color:var(--text-muted); text-align:center;'>Sin resultados encontrados</p>";
+                return;
+            }
+
+            lista.forEach(p => {
+                const checks = p.checkins || {};
+                let logs = Object.entries(checks).map(([fecha, hora]) => `<span style="display:block; margin: 3px 0;">📅 ${fecha} — ⏰ ${hora}</span>`).join('');
+                
+                html += `
+                    <div class="participant">
+                        <strong>${p.nombre}</strong>
+                        <div class="participant-meta">Distrito: ${p.distrito || 'S/D'} | Tel: ${p.telefono || 'S/T'}</div>
+                        <div class="participant-times">${logs || '❌ Sin asistencias asentadas.'}</div>
+                    </div>`;
+            });
+            document.getElementById('lista_container').innerHTML = html;
+        }
+
+        function filtrarLista() {
+            const query = document.getElementById('buscador-lista').value.toLowerCase().trim();
+            const filtrados = listadoAsistentesCache.filter(p => {
+                return (p.nombre && p.nombre.toLowerCase().includes(query)) ||
+                       (p.distrito && p.distrito.toLowerCase().includes(query)) ||
+                       (p.telefono && p.telefono.includes(query));
+            });
+            renderizarListaFiltrada(filtrados);
         }
     </script>
 </body>
