@@ -444,6 +444,25 @@
 
         #escanner-bloqueado { text-align: center; padding: 40px 10px; color: var(--text-muted); }
 
+        /* Estilo para las etiquetas de control registradas en la lista */
+        .badge-checkpoint {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-right: 6px;
+            margin-top: 4px;
+            font-size: 11px;
+            background: rgba(245, 166, 35, 0.08);
+            border: 1px solid rgba(245, 166, 35, 0.15);
+            padding: 4px 8px;
+            border-radius: 8px;
+            color: #fff;
+        }
+        .badge-checkpoint b {
+            color: var(--primary-accent);
+            font-weight: 700;
+        }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @media (max-width: 600px) { 
             .tabs { padding: 8px; gap: 4px; }
@@ -523,7 +542,6 @@
                 <div class="checkpoint-selector">
                     <label>📍 Selecciona el punto de control actual:</label>
                     <select id="punto-control-actual">
-                        <!-- NUEVOS PUNTOS DE CONTROL SOLICITADOS -->
                         <option value="Viernes - Abordaje Mañana">Viernes - Abordaje Mañana 🌅</option>
                         <option value="Viernes - Abordaje Rancho Nuevo">Viernes - Abordaje Rancho Nuevo 🌳</option>
                         <option value="Viernes - Regreso Hotel Noche">Viernes - Regreso Hotel Noche 🏨</option>
@@ -910,6 +928,7 @@
                         const puntosListados = Object.keys(historial);
                         const totalPuntosPersona = puntosListados.length;
                         
+                        // SECCIÓN DE HISTORIAL DETALLADO ACTUALIZADO
                         let detallePuntos = "";
                         puntosListados.sort().forEach(punto => {
                             let icono = "📍";
@@ -917,11 +936,15 @@
                             if(punto.includes("Hotel") || punto.includes("Noche")) icono = "🏨";
                             if(punto.includes("Cañón")) icono = "⛰️";
                             if(punto.includes("Plaza")) icono = "🛒";
-                            detallePuntos += `<span style="display:inline-block; margin-right:8px; font-size:11px; background:rgba(255,255,255,0.05); padding:3px 6px; border-radius:6px; color:#fff;">${icono} ${punto}: <b>${historial[punto]}</b></span>`;
+                            
+                            // Se genera la etiqueta HTML explícita uniendo Punto de Control + Hora
+                            detallePuntos += `
+                                <span class="badge-checkpoint">
+                                    ${icono} ${punto}: <b>${historial[punto]}</b>
+                                </span>`;
                         });
 
                         let claseColor = "rojo";
-                        // Máximo 7 controles totales ahora
                         if (totalPuntosPersona === 7) claseColor = "verde";
                         else if (totalPuntosPersona > 0) claseColor = "amarillo";
 
@@ -930,7 +953,9 @@
                                 <div class="participant-info">
                                     <strong>${p.nombre || 'Desconocido'}</strong>
                                     <div class="participant-info-sub">Tel: ${p.telefono} | Cód: ${p.codigo}</div>
-                                    <div style="margin-top: 8px; line-height:1.6; display:flex; flex-wrap:wrap; gap:4px;">${detallePuntos || '<span style="color:var(--error-color); font-size:11px;">⚠️ Sin registros de movimiento</span>'}</div>
+                                    <div style="margin-top: 8px; line-height:1.6; display:flex; flex-wrap:wrap; gap:4px;">
+                                        ${detallePuntos || '<span style="color:var(--error-color); font-size:11px;">⚠️ Sin registros de movimiento</span>'}
+                                    </div>
                                 </div>
                                 <div class="participant-actions">
                                     <div class="status">
