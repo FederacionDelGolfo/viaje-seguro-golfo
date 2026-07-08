@@ -485,7 +485,7 @@
                     db.ref('asistentes/' + codigoInput).update({
                         checkins: historialCheckins
                     }).then(() => {
-                        document.getElementById('qr-resultado-exito').innerHTML = `🎉 ✅ ¡BIENVENIDO, ${persona.nombre}!`;
+                        document.getElementById('qr-resultado-exito').innerHTML = `🎉 ✅ ¡BIENVENIDO, ${persona.nombre}! (${horaActual})`;
                         document.getElementById('qr-resultado-exito').style.color = "var(--success-color)";
                         try { navigator.vibrate(200); } catch(e){}
                     });
@@ -550,7 +550,8 @@
                         
                         let detalleFechas = "";
                         diasRegistrados.forEach(f => {
-                            detalleFechas += `📅 ${f} `;
+                            // Se concatena la fecha junto a la hora guardada en Firebase
+                            detalleFechas += `📅 ${f} (${historial[f]}) `;
                         });
 
                         panelesHtml += `
