@@ -377,8 +377,9 @@
             border-color: var(--primary-accent);
         }
         .distrito-tab span {
-            color: var(--success-color);
+            color: var(--primary-accent);
             margin-right: 2px;
+            font-weight: 900;
         }
 
         .distrito-panel { display: none; }
@@ -843,7 +844,6 @@
                 const tabActivaAnterior = document.querySelector('.distrito-tab.active');
                 const distritoActivoAnterior = tabActivaAnterior ? tabActivaAnterior.id.replace('tab-link-', '') : null;
 
-                // NUEVA LÓGICA: Contadores exactos basados en personas físicas, no en puntos de control
                 let totalAsistentes = 0; 
                 let personasConCheckin = 0; 
                 let personasFaltantes = 0; 
@@ -852,15 +852,15 @@
                 
                 snapshot.forEach((childSnapshot) => {
                     const p = childSnapshot.val();
-                    totalAsistentes++; // Sumamos 1 persona física registrada
+                    totalAsistentes++; 
                     
                     const historial = p.checkins || {};
                     const numCheckinsPersona = Object.keys(historial).length;
 
                     if (numCheckinsPersona > 0) {
-                        personasConCheckin++; // Tiene al menos un abordaje o entrada
+                        personasConCheckin++; 
                     } else {
-                        personasFaltantes++; // No se ha presentado a ningún punto
+                        personasFaltantes++; 
                     }
 
                     const distName = p.distrito || "SIN DISTRITO";
@@ -868,7 +868,6 @@
                     porDistrito[distName].push(p);
                 });
 
-                // Enviamos los datos reales basados en personas al Dashboard
                 actualizarContadoresDashboard(totalAsistentes, personasConCheckin, personasFaltantes);
 
                 const distritosOrdenados = Object.keys(porDistrito).sort();
@@ -886,15 +885,12 @@
                     const classActive = isActive ? 'active' : '';
                     const displayStyle = isActive ? 'block' : 'none';
                     
-                    let checkinsDelDistrito = 0;
-                    porDistrito[dist].forEach(p => {
-                        checkinsDelDistrito += Object.keys(p.checkins || {}).length;
-                    });
-                    const maximoDistrito = porDistrito[dist].length * 6;
+                    // CORRECCIÓN AQUÍ: Contamos la cantidad humana real (longitud del array del distrito)
+                    const totalAsistentesDistrito = porDistrito[dist].length;
 
                     tabsHtml += `
                         <div class="distrito-tab ${classActive}" onclick="showDistritoTab('${dist}')" id="tab-link-${dist}">
-                            <span>${checkinsDelDistrito}</span>/${maximoDistrito} ${dist}
+                            <span>👤 ${totalAsistentesDistrito}</span> ${dist}
                         </div>`;
                     
                     panelesHtml += `<div class="distrito-panel ${classActive}" id="panel-dist-${dist}" style="display: ${displayStyle};">`;
@@ -944,7 +940,6 @@
             });
         }
 
-        // Modificación del Dashboard para reflejar y calcular porcentajes exactos por persona
         function actualizarContadoresDashboard(totalAsistentes, conCheckin, faltantes) {
             const porcentaje = totalAsistentes > 0 ? Math.round((conCheckin / totalAsistentes) * 100) : 0;
 
