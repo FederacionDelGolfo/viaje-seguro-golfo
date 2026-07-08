@@ -139,7 +139,6 @@
             line-height: 1.5;
         }
 
-        /* --- MEJORA: LOGIN DE ACCESO ADMIN --- */
         .admin-lockbox {
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -173,7 +172,6 @@
             font-weight: bold;
             border-color: rgba(255,255,255,0.15);
         }
-        /* ------------------------------------- */
 
         /* --- ESTADÍSTICAS REAL-TIME --- */
         .stats-grid {
@@ -221,18 +219,45 @@
             transition: width 0.5s ease-in-out;
         }
 
+        /* --- MEJORA: BUSCADOR CON BOTÓN LIMPIAR INTEGRADO --- */
         .search-container {
             margin-bottom: 20px;
             position: relative;
+            display: flex;
+            align-items: center;
         }
         .search-container input {
             margin: 0;
-            padding: 14px 16px;
+            padding: 14px 45px 14px 16px; /* Padding derecho extra para que el texto no tape la X */
             background-color: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(245, 166, 35, 0.3);
+            width: 100%;
         }
         .search-container input:focus {
             border-color: var(--primary-accent);
+        }
+        .btn-clear-search {
+            position: absolute;
+            right: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            display: none; /* Se activa dinámicamente con JS */
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            transition: all 0.2s;
+        }
+        .btn-clear-search:hover {
+            background: var(--error-color);
+            color: #fff;
         }
 
         input { 
@@ -315,6 +340,12 @@
             background-color: rgba(245, 166, 35, 0.15); 
             color: var(--primary-accent); 
             border-color: var(--primary-accent);
+        }
+
+        /* Indicador específico del contador de check-ins en la pestaña */
+        .distrito-tab span {
+            color: var(--success-color);
+            margin-right: 2px;
         }
 
         .distrito-panel { display: none; }
@@ -462,7 +493,7 @@
                     </div>
                     <div class="stat-box pending">
                         <span class="num" id="stat-pendientes">0</span>
-                        <span class="label">Pendientes de check in</span>
+                        <span class="label">Pendientes</span>
                     </div>
                 </div>
 
@@ -472,6 +503,7 @@
 
                 <div class="search-container">
                     <input type="text" id="lista-busqueda" placeholder="🔍 BUSCAR ASISTENTE (NOMBRE, TELÉFONO O CÓDIGO)..." oninput="filtrarListaGlobal()">
+                    <button class="btn-clear-search" id="btn-limpiar" onclick="limpiarBuscador()">✕</button>
                 </div>
 
                 <div id="distritos_tabs" class="distritos-tabs-container"></div>
@@ -753,7 +785,19 @@
 
                 distritosOrdenados.forEach((dist, index) => {
                     const isActive = index === 0 ? 'active' : '';
-                    tabsHtml += `<div class="distrito-tab ${isActive}" onclick="showDistritoTab('${dist}')" id="tab-link-${dist}">${dist} (${porDistrito[dist].length})</div>`;
+                    
+                    // MEJORA 3: Calcular check-ins del día de hoy específicamente para ESTE distrito
+                    let checkinsDistritoHoy = 0;
+                    porDistrito[dist].forEach(p => {
+                        const historial = p.checkins || {};
+                        if (historial[fechaHoy]) checkinsDistritoHoy++;
+                    });
+
+                    // Inyección de etiquetas de avance (Ej: COATZACOALCOS (5/15))
+                    tabsHtml += `
+                        <div class="distrito-tab ${isActive}" onclick="showDistritoTab('${dist}')" id="tab-link-${dist}">
+                            <span>${checkinsDistritoHoy}</span>/${porDistrito[dist].length} ${dist}
+                        </div>`;
                     
                     panelesHtml += `<div class="distrito-panel ${isActive}" id="panel-dist-${dist}">`;
                     porDistrito[dist].forEach(p => {
@@ -791,12 +835,15 @@
             });
         }
 
+        // FUNCIONALIDAD: Filtra de manera interactiva la lista completa
         function filtrarListaGlobal() {
             const query = document.getElementById('lista-busqueda').value.toLowerCase().trim();
             const participantes = document.querySelectorAll('.participant');
             const tabsContainer = document.getElementById('distritos_tabs');
+            const btnLimpiar = document.getElementById('btn-limpiar');
 
             if (query === "") {
+                btnLimpiar.style.display = 'none'; // Esconde el botón X si no hay texto
                 tabsContainer.style.display = 'flex';
                 participantes.forEach(p => p.style.display = 'flex');
                 
@@ -808,6 +855,8 @@
                 return;
             }
 
+            // MEJORA 2: Muestra el botón X si el usuario escribió algo
+            btnLimpiar.style.display = 'flex';
             tabsContainer.style.display = 'none';
 
             participantes.forEach(p => {
@@ -828,6 +877,13 @@
                     panel.style.display = 'none';
                 }
             });
+        }
+
+        // MEJORA 2: Acción directa al presionar la X del buscador
+        function limpiarBuscador() {
+            document.getElementById('lista-busqueda').value = '';
+            filtrarListaGlobal();
+            document.getElementById('lista-busqueda').focus();
         }
 
         function actualizarContadoresDashboard(total, abordados) {
