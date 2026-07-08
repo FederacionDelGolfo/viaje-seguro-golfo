@@ -219,7 +219,6 @@
             transition: width 0.5s ease-in-out;
         }
 
-        /* --- MEJORA: BUSCADOR CON BOTÓN LIMPIAR INTEGRADO --- */
         .search-container {
             margin-bottom: 20px;
             position: relative;
@@ -228,7 +227,7 @@
         }
         .search-container input {
             margin: 0;
-            padding: 14px 45px 14px 16px; /* Padding derecho extra para que el texto no tape la X */
+            padding: 14px 45px 14px 16px;
             background-color: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(245, 166, 35, 0.3);
             width: 100%;
@@ -248,7 +247,7 @@
             font-size: 11px;
             font-weight: bold;
             cursor: pointer;
-            display: none; /* Se activa dinámicamente con JS */
+            display: none;
             align-items: center;
             justify-content: center;
             padding: 0;
@@ -260,7 +259,7 @@
             color: #fff;
         }
 
-        input { 
+        input, select { 
             padding: 16px; 
             margin: 10px 0; 
             width: 100%; 
@@ -271,12 +270,23 @@
             border: 1px solid rgba(255,255,255,0.1); 
             color: var(--text-main); 
             transition: all 0.2s; 
+            appearance: none;
         }
-        input:focus { 
+        select {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10px' height='10px' fill='%23a4b0be'><polygon points='0,0 10,0 5,5'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            cursor: pointer;
+        }
+        input:focus, select:focus { 
             outline: none; 
             border-color: var(--primary-accent); 
             box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.15); 
             background-color: rgba(0, 0, 0, 0.4);
+        }
+        select option {
+            background-color: var(--container-bg);
+            color: var(--text-main);
         }
 
         button { 
@@ -341,8 +351,6 @@
             color: var(--primary-accent); 
             border-color: var(--primary-accent);
         }
-
-        /* Indicador específico del contador de check-ins en la pestaña */
         .distrito-tab span {
             color: var(--success-color);
             margin-right: 2px;
@@ -422,7 +430,25 @@
             <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="NOMBRE COMPLETO" oninput="this.value = this.value.toUpperCase()">
             <input type="tel" id="telefono" placeholder="TELÉFONO" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-            <input type="text" id="distrito" placeholder="DISTRITO" oninput="this.value = this.value.toUpperCase()">
+            
+            <select id="distrito">
+                <option value="" disabled selected>SELECCIONA TU DISTRITO</option>
+                <option value="ALLENDE">ALLENDE</option>
+                <option value="BARRANCAS">BARRANCAS</option>
+                <option value="CENTRAL">CENTRAL</option>
+                <option value="CERRITOS">CERRITOS</option>
+                <option value="COATZA 1">COATZA 1</option>
+                <option value="COATZA 2">COATZA 2</option>
+                <option value="COATZA 3">COATZA 3</option>
+                <option value="COATZA 4">COATZA 4</option>
+                <option value="COATZA 5">COATZA 5</option>
+                <option value="COATZA 6">COATZA 6</option>
+                <option value="MUNDO NUEVO">MUNDO NUEVO</option>
+                <option value="NANCHITAL 1">NANCHITAL 1</option>
+                <option value="NANCHITAL 2">NANCHITAL 2</option>
+                <option value="NANCHITAL 3">NANCHITAL 3</option>
+            </select>
+            
             <button onclick="registrar()" class="success" id="btn-registrar">Registrar y Descargar QR</button>
             
             <div id="qr-container-reg" class="qr-display-container">
@@ -563,10 +589,10 @@
         function registrar() {
             const nombre = document.getElementById('nombre').value.trim().toUpperCase();
             const telefono = document.getElementById('telefono').value.trim();
-            const distrito = document.getElementById('distrito').value.trim().toUpperCase();
+            const distrito = document.getElementById('distrito').value;
 
             if (!nombre || !telefono || !distrito) {
-                alert("⚠️ Por favor, rellena todos los campos.");
+                alert("⚠️ Por favor, rellena todos los campos y selecciona tu distrito.");
                 return;
             }
 
@@ -594,7 +620,7 @@
                     
                     document.getElementById('nombre').value = '';
                     document.getElementById('telefono').value = '';
-                    document.getElementById('distrito').value = '';
+                    document.getElementById('distrito').selectedIndex = 0;
                 }
             });
         }
@@ -786,14 +812,12 @@
                 distritosOrdenados.forEach((dist, index) => {
                     const isActive = index === 0 ? 'active' : '';
                     
-                    // MEJORA 3: Calcular check-ins del día de hoy específicamente para ESTE distrito
                     let checkinsDistritoHoy = 0;
                     porDistrito[dist].forEach(p => {
                         const historial = p.checkins || {};
                         if (historial[fechaHoy]) checkinsDistritoHoy++;
                     });
 
-                    // Inyección de etiquetas de avance (Ej: COATZACOALCOS (5/15))
                     tabsHtml += `
                         <div class="distrito-tab ${isActive}" onclick="showDistritoTab('${dist}')" id="tab-link-${dist}">
                             <span>${checkinsDistritoHoy}</span>/${porDistrito[dist].length} ${dist}
@@ -835,7 +859,6 @@
             });
         }
 
-        // FUNCIONALIDAD: Filtra de manera interactiva la lista completa
         function filtrarListaGlobal() {
             const query = document.getElementById('lista-busqueda').value.toLowerCase().trim();
             const participantes = document.querySelectorAll('.participant');
@@ -843,7 +866,7 @@
             const btnLimpiar = document.getElementById('btn-limpiar');
 
             if (query === "") {
-                btnLimpiar.style.display = 'none'; // Esconde el botón X si no hay texto
+                btnLimpiar.style.display = 'none';
                 tabsContainer.style.display = 'flex';
                 participantes.forEach(p => p.style.display = 'flex');
                 
@@ -855,7 +878,6 @@
                 return;
             }
 
-            // MEJORA 2: Muestra el botón X si el usuario escribió algo
             btnLimpiar.style.display = 'flex';
             tabsContainer.style.display = 'none';
 
@@ -879,7 +901,6 @@
             });
         }
 
-        // MEJORA 2: Acción directa al presionar la X del buscador
         function limpiarBuscador() {
             document.getElementById('lista-busqueda').value = '';
             filtrarListaGlobal();
