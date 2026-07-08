@@ -174,7 +174,7 @@
             border-color: rgba(255,255,255,0.15);
         }
 
-        /* --- ESTADÍSTICAS REAL-TIME --- */
+        /* --- ESTADÍSTICAS REAL-TIME ACTUALIZADAS POR PERSONA --- */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -418,7 +418,6 @@
         }
         .btn-delete:hover { background: var(--error-color); color: white; }
 
-        /* Estilo para el nuevo botón Editar */
         .btn-edit {
             background: rgba(9, 132, 227, 0.1);
             color: var(--info-color);
@@ -459,15 +458,15 @@
         </header>
 
         <div class="tabs">
-            <div class="tab active" onclick="showTab(0)" id="nav-tab0">Registro</div>
+            <div class="tab" onclick="showTab(0)" id="nav-tab0">Registro</div>
             <div class="tab" onclick="showTab(1)" id="nav-tab1">Recuperar</div>
             <div class="tab" onclick="showTab(2)" id="nav-tab2">Escanear</div>
-            <div class="tab" onclick="showTab(3)" id="nav-tab3">Lista</div>
+            <div class="tab active" onclick="showTab(3)" id="nav-tab3">Lista</div>
         </div>
 
         <div id="loading">⌛ Conectando con la nube... Por favor espera.</div>
 
-        <div id="tab0" class="card" style="display: block;">
+        <div id="tab0" class="card">
             <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="NOMBRE COMPLETO" oninput="this.value = this.value.toUpperCase()">
             <input type="tel" id="telefono" placeholder="TELÉFONO" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
@@ -546,7 +545,7 @@
             </div>
         </div>
 
-        <div id="tab3" class="card">
+        <div id="tab3" class="card" style="display: block;">
             <h2>Lista de Participantes</h2>
             
             <div id="admin-login-lista">
@@ -608,7 +607,6 @@
         let nombreUltimoRegistro = "boleto";
         let isAdminAuthenticated = false;
 
-        // Lista de distritos válidos para el control de edición
         const distritosValidos = ["ALLENDE", "BARRANCAS", "CENTRAL", "CERRITOS", "COATZA 1", "COATZA 2", "COATZA 3", "COATZA 4", "COATZA 5", "COATZA 6", "MUNDO NUEVO", "NANCHITAL 1", "NANCHITAL 2", "NANCHITAL 3"];
 
         function showTab(n) {
@@ -832,7 +830,6 @@
                 const tabsContainer = document.getElementById('distritos_tabs');
                 const panelesContainer = document.getElementById('distritos_paneles');
                 
-                // Salida preventiva si no hay contenedor visible (cambio rápido de pestaña)
                 if(document.getElementById('lista_container').style.display === 'none' && !isAdminAuthenticated) return;
                 document.getElementById('lista_container').style.display = 'block';
 
@@ -843,37 +840,42 @@
                     return;
                 }
 
-                // Guardar la pestaña de distrito que estaba activa para no perder el foco al refrescar
                 const tabActivaAnterior = document.querySelector('.distrito-tab.active');
                 const distritoActivoAnterior = tabActivaAnterior ? tabActivaAnterior.id.replace('tab-link-', '') : null;
 
-                let totalAsistentes = 0;
-                let totalCheckinsRealizadosGlobal = 0;
+                // NUEVA LÓGICA: Contadores exactos basados en personas físicas, no en puntos de control
+                let totalAsistentes = 0; 
+                let personasConCheckin = 0; 
+                let personasFaltantes = 0; 
 
                 const porDistrito = {};
                 
-                // Asegurar que aparezcan los distritos oficiales vacíos si es necesario, o agrupar dinámicamente
                 snapshot.forEach((childSnapshot) => {
                     const p = childSnapshot.val();
-                    totalAsistentes++;
+                    totalAsistentes++; // Sumamos 1 persona física registrada
                     
                     const historial = p.checkins || {};
-                    totalCheckinsRealizadosGlobal += Object.keys(historial).length;
+                    const numCheckinsPersona = Object.keys(historial).length;
+
+                    if (numCheckinsPersona > 0) {
+                        personasConCheckin++; // Tiene al menos un abordaje o entrada
+                    } else {
+                        personasFaltantes++; // No se ha presentado a ningún punto
+                    }
 
                     const distName = p.distrito || "SIN DISTRITO";
                     if (!porDistrito[distName]) porDistrito[distName] = [];
                     porDistrito[distName].push(p);
                 });
 
-                const maximoCheckinsEsperados = totalAsistentes * 6;
-                actualizarContadoresDashboard(totalAsistentes, totalCheckinsRealizadosGlobal, maximoCheckinsEsperados);
+                // Enviamos los datos reales basados en personas al Dashboard
+                actualizarContadoresDashboard(totalAsistentes, personasConCheckin, personasFaltantes);
 
                 const distritosOrdenados = Object.keys(porDistrito).sort();
                 let tabsHtml = "";
                 let panelesHtml = "";
 
                 distritosOrdenados.forEach((dist, index) => {
-                    // Si habia pestaña activa anterior se respeta, si no, se activa la primera
                     let isActive = false;
                     if (distritoActivoAnterior) {
                         isActive = (dist === distritoActivoAnterior);
@@ -936,34 +938,38 @@
                 tabsContainer.innerHTML = tabsHtml;
                 panelesContainer.innerHTML = panelesHtml;
                 
-                // Si el administrador estaba buscando algo, re-aplicamos el filtro
                 if (document.getElementById('lista-busqueda').value.trim() !== "") {
                     filtrarListaGlobal();
                 }
             });
         }
 
-        // NUEVA FUNCIÓN: EDITAR DATOS DEL ASISTENTE SIN PERDER QR NI HISTORIAL
+        // Modificación del Dashboard para reflejar y calcular porcentajes exactos por persona
+        function actualizarContadoresDashboard(totalAsistentes, conCheckin, faltantes) {
+            const porcentaje = totalAsistentes > 0 ? Math.round((conCheckin / totalAsistentes) * 100) : 0;
+
+            document.getElementById('stat-total').innerText = totalAsistentes;
+            document.getElementById('stat-abordados').innerText = conCheckin;
+            document.getElementById('stat-pendientes').innerText = faltantes;
+            document.getElementById('stat-progreso').style.width = porcentaje + '%';
+        }
+
         function editarRegistro(codigo, nombreActual, telefonoActual, distritoActual) {
-            // 1. Modificar Nombre
             let nuevoNombre = prompt(`✏️ Editar Nombre Completo para el código [${codigo}]:`, nombreActual);
-            if (nuevoNombre === null) return; // Cancelado
+            if (nuevoNombre === null) return; 
             nuevoNombre = nuevoNombre.trim().toUpperCase();
             if (!nuevoNombre) return alert("❌ El nombre no puede quedar vacío.");
 
-            // 2. Modificar Teléfono
             let nuevoTelefono = prompt(`📞 Editar Número de Teléfono:`, telefonoActual);
             if (nuevoTelefono === null) return;
             nuevoTelefono = nuevoTelefono.replace(/[^0-9]/g, '').trim();
             if (!nuevoTelefono) return alert("❌ El teléfono debe contener solo números.");
 
-            // 3. Modificar Distrito (Se imprime la lista para asegurar captura exacta)
             let mensajeDistritos = "🏢 Escribe el nuevo DISTRITO exactamente de la lista:\n\n" + distritosValidos.join(", ");
             let nuevoDistrito = prompt(mensajeDistritos, distritoActual);
             if (nuevoDistrito === null) return;
             nuevoDistrito = nuevoDistrito.trim().toUpperCase();
 
-            // Validar que el distrito escrito exista en tu listado oficial
             if (!distritosValidos.includes(nuevoDistrito)) {
                 alert(`❌ Distrito no válido.\nDebes escribirlo exactamente igual a las opciones del formulario.`);
                 return;
@@ -971,7 +977,6 @@
 
             toggleLoading(true);
 
-            // Guardar actualizaciones manteniendo el nodo 'checkins' original
             db.ref('asistentes/' + codigo).update({
                 nombre: nuevoNombre,
                 telefono: nuevoTelefono,
@@ -1031,16 +1036,6 @@
             document.getElementById('lista-busqueda').value = '';
             filtrarListaGlobal();
             document.getElementById('lista-busqueda').focus();
-        }
-
-        function actualizarContadoresDashboard(totalAsistentes, checkinsHechos, maximoEsperado) {
-            const pendientes = maximoEsperado - checkinsHechos;
-            const porcentaje = maximoEsperado > 0 ? Math.round((checkinsHechos / maximoEsperado) * 100) : 0;
-
-            document.getElementById('stat-total').innerText = totalAsistentes;
-            document.getElementById('stat-abordados').innerText = checkinsHechos;
-            document.getElementById('stat-pendientes').innerText = pendientes;
-            document.getElementById('stat-progreso').style.width = porcentaje + '%';
         }
 
         function eliminarRegistro(codigo, nombre) {
