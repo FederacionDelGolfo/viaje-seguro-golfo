@@ -8,6 +8,8 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
+    <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
         :root {
@@ -77,6 +79,8 @@
         button.success { background-color: var(--success-color); color: white; }
         button.success:hover { background-color: #00a383; }
 
+        #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 12px; overflow: hidden; border: 2px dashed rgba(255,255,255,0.1); background: #000; }
+
         .distritos-tabs-container { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .distrito-tab { padding: 8px 14px; background-color: rgba(255,255,255,0.05); color: var(--text-muted); border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .distrito-tab.active { background-color: var(--secondary-accent); color: #10121a; font-weight: 700; }
@@ -108,7 +112,10 @@
         }
         .btn-delete:hover { background: var(--error-color); color: white; }
 
+        #qr-resultado-exito { text-align: center; color: var(--success-color); font-weight: bold; font-size: 18px; margin: 15px 0; min-height: 24px; }
         #loading { display: none; text-align: center; color: var(--secondary-accent); font-weight: bold; margin: 10px 0; }
+        
+        #qr-container { width: 180px; height: 180px; background: white; padding: 10px; margin: 20px auto; border-radius: 8px; display: none; justify-content: center; align-items: center; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @media (max-width: 600px) { 
@@ -125,7 +132,7 @@
 
         <div class="tabs">
             <div class="tab active" onclick="showTab(0)" id="nav-tab0">Registro</div>
-            <div class="tab" onclick="showTab(1)" id="nav-tab1">Check-in</div>
+            <div class="tab" onclick="showTab(1)" id="nav-tab1">Escanear</div>
             <div class="tab" onclick="showTab(2)" id="nav-tab2">Lista</div>
         </div>
 
@@ -136,13 +143,19 @@
             <input type="text" id="nombre" placeholder="NOMBRE COMPLETO" oninput="this.value = this.value.toUpperCase()">
             <input type="tel" id="telefono" placeholder="TELÉFONO" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <input type="text" id="distrito" placeholder="DISTRITO" oninput="this.value = this.value.toUpperCase()">
-            <button onclick="registrar()" class="success" id="btn-registrar">Registrarme</button>
+            <button onclick="registrar()" class="success" id="btn-registrar">Registrar e Imprimir Boleto</button>
+            
+            <div id="qr-container">
+                <img id="qr-ticket" src="" alt="Código QR de Acceso">
+            </div>
         </div>
 
         <div id="tab1" class="card">
-            <h2>Check-in de Asistencia</h2>
-            <input type="text" id="codigo" placeholder="CÓDIGO" maxlength="4" style="text-align: center; letter-spacing: 5px; font-weight: bold; font-size: 20px;">
-            <button onclick="hacerCheckin()" class="primary" id="btn-checkin">Confirmar Mi Asistencia</button>
+            <h2>Escáner de Boletos</h2>
+            <div id="qr-resultado-exito"></div>
+            <div id="reader"></div>
+            <input type="text" id="codigo" placeholder="O TECLEA EL CÓDIGO MANUAL" maxlength="4" style="text-align: center; font-weight: bold; margin-top:20px;">
+            <button onclick="hacerCheckinManual()" class="primary" id="btn-checkin">Check-in Manual</button>
         </div>
 
         <div id="tab2" class="card">
@@ -158,32 +171,37 @@
     </div>
 
     <script>
-        // Configuración de Firebase obtenida de tus capturas oficiales
         const firebaseConfig = {
             apiKey: "AIzaSyAswPuSrqT_X6Dgp5YKrensweVwTY16EE",
             authDomain: "viaje-federacion.firebaseapp.com",
-            databaseURL: "https://viaje-federacion-default-rtdb.firebaseio.com/", // URL estándar basada en tu ID de proyecto
+            databaseURL: "https://viaje-federacion-default-rtdb.firebaseio.com/",
             projectId: "viaje-federacion",
             storageBucket: "viaje-federacion.appspot.com",
             messagingSenderId: "367004191433",
             appId: "1:367004191433:web:9ec4c3455e8a2f1dc68bdc"
         };
 
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        let html5QrcodeScanner = null;
 
         function showTab(n) {
             const cards = document.querySelectorAll('.card');
             const tabs = document.querySelectorAll('.tab');
             cards.forEach((c, i) => c.style.display = (i === n) ? 'block' : 'none');
             tabs.forEach((t, i) => t.classList.toggle('active', i === n));
+            
+            // Encender la cámara solo si se entra a la pestaña de Escáner
+            if (n === 1) {
+                encenderEscaner();
+            } else {
+                apagarEscaner();
+            }
         }
 
         function toggleLoading(show) {
             document.getElementById('loading').style.display = show ? 'block' : 'none';
             document.getElementById('btn-registrar').disabled = show;
-            document.getElementById('btn-checkin').disabled = show;
         }
 
         function registrar() {
@@ -199,7 +217,6 @@
             const codigo = String(Math.floor(1000 + Math.random() * 9000));
             toggleLoading(true);
 
-            // Guardar directamente en la Realtime Database de Firebase usando el código como llave única
             db.ref('asistentes/' + codigo).set({
                 nombre: nombre,
                 distrito: distrito,
@@ -211,9 +228,15 @@
             }, (error) => {
                 toggleLoading(false);
                 if (error) {
-                    alert("Error al registrar en Firebase: " + error.message);
+                    alert("Error en Firebase: " + error.message);
                 } else {
-                    alert(`✅ ¡Registro exitoso, ${nombre}!\nTu código de acceso es: ${codigo}`);
+                    // Generar un código QR gráfico instantáneo usando una API pública rápida
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${codigo}`;
+                    document.getElementById('qr-ticket').src = qrUrl;
+                    document.getElementById('qr-container').style.display = 'flex';
+                    
+                    alert(`✅ ¡Registro completo!\nToma una captura al código QR que apareció en pantalla o comparte el código: ${codigo}`);
+                    
                     document.getElementById('nombre').value = '';
                     document.getElementById('telefono').value = '';
                     document.getElementById('distrito').value = '';
@@ -221,25 +244,47 @@
             });
         }
 
-        function hacerCheckin() {
-            const codigoInput = document.getElementById('codigo').value.trim();
-            if (!codigoInput) return alert("Ingresa un código.");
+        // 🔥 FUNCIÓN PRINCIPAL DEL ESCÁNER AUTOMÁTICO
+        function encenderEscaner() {
+            if (html5QrcodeScanner) return;
 
-            toggleLoading(true);
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start(
+                { facingMode: "environment" }, // Usa la cámara trasera del celular
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (codigoDetectado) => {
+                    // Cuando lee un QR, ejecuta el check-in inmediatamente
+                    procesarCheckinAutomatico(codigoDetectado.trim());
+                },
+                (error) => { /* Ignorar errores de enfoque de cámara */ }
+            ).catch(err => {
+                console.error("No se pudo iniciar la cámara: ", err);
+            });
+        }
+
+        function apagarEscaner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    html5QrcodeScanner = null;
+                    document.getElementById('reader').innerHTML = "";
+                }).catch(err => console.log(err));
+            }
+        }
+
+        function procesarCheckinAutomatico(codigoInput) {
+            if (!codigoInput) return;
 
             db.ref('asistentes/' + codigoInput).once('value').then((snapshot) => {
                 if (!snapshot.exists()) {
-                    toggleLoading(false);
-                    alert("❌ Código incorrecto. Verifica el número.");
+                    document.getElementById('qr-resultado-exito').innerHTML = "❌ Código QR Inválido";
+                    document.getElementById('qr-resultado-exito').style.color = "var(--error-color)";
                     return;
                 }
 
                 const persona = snapshot.val();
-
                 if (persona.checkin === "Si") {
-                    toggleLoading(false);
-                    alert(`ℹ️ ${persona.nombre} ya realizó el check-in.`);
-                    document.getElementById('codigo').value = '';
+                    document.getElementById('qr-resultado-exito').innerHTML = `ℹ️ ${persona.nombre} ya tiene check-in`;
+                    document.getElementById('qr-resultado-exito').style.color = "var(--secondary-accent)";
                 } else {
                     const ahora = new Date();
                     const horaLimpia = ahora.toLocaleDateString('es-MX') + ' ' + ahora.toLocaleTimeString('es-MX');
@@ -248,19 +293,22 @@
                         checkin: "Si",
                         checkinFecha: horaLimpia
                     }).then(() => {
-                        toggleLoading(false);
-                        alert(`🎉 ✅ Check-in completado para ${persona.nombre}`);
-                        document.getElementById('codigo').value = '';
+                        // Alerta visual de éxito en verde sin trabar el flujo de la cámara
+                        document.getElementById('qr-resultado-exito').innerHTML = `🎉 ✅ ¡BIENVENIDO, ${persona.nombre}!`;
+                        document.getElementById('qr-resultado-exito').style.color = "var(--success-color)";
                         
-                        if(window.location.search) {
-                            window.history.replaceState({}, document.title, window.location.pathname);
-                        }
+                        // Hacer un pequeño sonido de notificación si el dispositivo lo permite
+                        try { navigator.vibrate(200); } catch(e){}
                     });
                 }
-            }).catch(err => {
-                toggleLoading(false);
-                alert("Error en el check-in: " + err.message);
             });
+        }
+
+        function hacerCheckinManual() {
+            const cod = document.getElementById('codigo').value.trim();
+            if(!cod) return alert("Escribe un código");
+            procesarCheckinAutomatico(cod);
+            document.getElementById('codigo').value = '';
         }
 
         function verLista() {
@@ -281,7 +329,7 @@
 
                 if (!snapshot.exists()) {
                     tabsContainer.innerHTML = "";
-                    panelesContainer.innerHTML = "<p>No hay registros guardados en Firebase todavía.</p>";
+                    panelesContainer.innerHTML = "<p>No hay registros todavía.</p>";
                     return;
                 }
 
@@ -325,26 +373,15 @@
 
                 tabsContainer.innerHTML = tabsHtml;
                 panelesContainer.innerHTML = panelesHtml;
-            }).catch(err => {
-                toggleLoading(false);
-                alert("Error al cargar la lista de Firebase: " + err.message);
             });
         }
 
         function eliminarRegistro(codigo, nombre) {
-            const confirmar = confirm(`⚠️ ¿Estás seguro de que deseas eliminar permanentemente a "${nombre}"?`);
-            if (!confirmar) return;
-
+            if (!confirm(`⚠️ ¿Eliminar a "${nombre}"?`)) return;
             toggleLoading(true);
-
-            // Eliminar de Firebase instantáneamente sin errores de sintaxis
             db.ref('asistentes/' + codigo).remove().then(() => {
                 toggleLoading(false);
-                alert(`🗑️ Registro de "${nombre}" eliminado correctamente.`);
-                verLista(); // Recargar la lista automáticamente
-            }).catch(err => {
-                toggleLoading(false);
-                alert("Error al eliminar: " + err.message);
+                verLista();
             });
         }
 
@@ -354,16 +391,6 @@
             document.getElementById(`panel-dist-${distritoSeleccionado}`).classList.add('active');
             document.getElementById(`tab-link-${distritoSeleccionado}`).classList.add('active');
         }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const codigoUrl = urlParams.get('code');
-
-            if (codigoUrl) {
-                showTab(1);
-                document.getElementById('codigo').value = codigoUrl;
-            }
-        });
     </script>
 </body>
 </html>
