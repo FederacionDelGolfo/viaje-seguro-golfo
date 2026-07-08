@@ -88,19 +88,19 @@
 
         .tabs { 
             display: flex; 
-            gap: 8px; 
-            padding: 15px; 
+            gap: 6px; 
+            padding: 12px; 
             background-color: rgba(0, 0, 0, 0.2); 
             border-bottom: 1px solid rgba(255,255,255,0.05); 
         }
         
         .tab { 
             flex: 1; 
-            padding: 14px; 
+            padding: 12px 6px; 
             text-align: center; 
             cursor: pointer; 
             font-weight: 700; 
-            font-size: 14px; 
+            font-size: 13px; 
             color: var(--text-muted); 
             border-radius: var(--radius-tab); 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -131,20 +131,12 @@
             padding-left: 12px;
         }
 
-        .sub-section {
-            margin-top: 30px;
-            padding-top: 25px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 16px;
-            font-weight: 700;
+        p.tab-description {
             color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 14px;
+            margin-top: -15px;
+            margin-bottom: 25px;
+            line-height: 1.5;
         }
 
         input { 
@@ -267,7 +259,7 @@
         #qr-resultado-exito { text-align: center; color: var(--success-color); font-weight: bold; font-size: 18px; margin: 15px 0; min-height: 24px; }
         #loading { text-align: center; color: var(--primary-accent); font-weight: bold; margin: 10px 0; display: none;}
         
-        #qr-container { display: none; flex-direction: column; align-items: center; background: rgba(0,0,0,0.3); padding: 25px; margin: 25px auto 0; border-radius: 16px; border: 1px solid rgba(245,166,35,0.2); max-width: 240px; }
+        .qr-display-container { display: none; flex-direction: column; align-items: center; background: rgba(0,0,0,0.3); padding: 25px; margin: 25px auto 0; border-radius: 16px; border: 1px solid rgba(245,166,35,0.2); max-width: 240px; }
         .qr-box { width: 180px; height: 180px; background: white; padding: 12px; border-radius: 12px; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .qr-box img { width: 100%; height: 100%; }
 
@@ -275,6 +267,8 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @media (max-width: 600px) { 
+            .tabs { padding: 8px; gap: 4px; }
+            .tab { font-size: 11px; padding: 10px 4px; }
             .participant { flex-direction: column; align-items: flex-start; gap: 12px; } 
             .participant-actions { width: 100%; justify-content: space-between; }
         }
@@ -289,8 +283,9 @@
 
         <div class="tabs">
             <div class="tab active" onclick="showTab(0)" id="nav-tab0">Registro</div>
-            <div class="tab" onclick="showTab(1)" id="nav-tab1">Escanear</div>
-            <div class="tab" onclick="showTab(2)" id="nav-tab2">Lista</div>
+            <div class="tab" onclick="showTab(1)" id="nav-tab1">Recuperar</div>
+            <div class="tab" onclick="showTab(2)" id="nav-tab2">Escanear</div>
+            <div class="tab" onclick="showTab(3)" id="nav-tab3">Lista</div>
         </div>
 
         <div id="loading">⌛ Conectando con la nube... Por favor espera.</div>
@@ -302,21 +297,29 @@
             <input type="text" id="distrito" placeholder="DISTRITO" oninput="this.value = this.value.toUpperCase()">
             <button onclick="registrar()" class="success" id="btn-registrar">Registrar y Descargar QR</button>
             
-            <div class="sub-section">
-                <h3>¿Ya te registraste pero perdiste tu QR?</h3>
-                <input type="tel" id="telefono-recuperar" placeholder="INGRESA TU TELÉFONO REGISTRADO" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                <button onclick="recuperarQR()" class="primary" id="btn-recuperar" style="margin-top: 10px;">Recuperar mi QR</button>
-            </div>
-
-            <div id="qr-container">
+            <div id="qr-container-reg" class="qr-display-container">
                 <div class="qr-box">
-                    <img id="qr-ticket" src="" alt="Código QR de Acceso">
+                    <img id="qr-ticket-reg" src="" alt="Código QR de Acceso">
                 </div>
-                <button onclick="descargarQR()" class="download" id="btn-descargar">📥 Descargar QR</button>
+                <button onclick="descargarQR('qr-ticket-reg')" class="download">📥 Descargar QR</button>
             </div>
         </div>
 
         <div id="tab1" class="card">
+            <h2>Recuperar Código QR</h2>
+            <p class="tab-description">¿Ya te registraste anteriormente pero perdiste tu código QR de acceso? Ingresa tu número de teléfono móvil para volver a obtenerlo.</p>
+            <input type="tel" id="telefono-recuperar" placeholder="INGRESA TU TELÉFONO REGISTRADO" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <button onclick="recuperarQR()" class="primary" id="btn-recuperar">Recuperar mi QR</button>
+            
+            <div id="qr-container-rec" class="qr-display-container">
+                <div class="qr-box">
+                    <img id="qr-ticket-rec" src="" alt="Código QR de Acceso Recuperado">
+                </div>
+                <button onclick="descargarQR('qr-ticket-rec')" class="download">📥 Descargar QR</button>
+            </div>
+        </div>
+
+        <div id="tab2" class="card">
             <h2>Escáner de Boletos</h2>
             
             <div id="escanner-contenido" style="display: none;">
@@ -332,7 +335,7 @@
             </div>
         </div>
 
-        <div id="tab2" class="card">
+        <div id="tab3" class="card">
             <h2>Lista de Participantes</h2>
             <input type="password" id="pass" placeholder="Contraseña de acceso">
             <button onclick="verLista()" class="primary">Ver Lista</button>
@@ -367,7 +370,8 @@
             cards.forEach((c, i) => c.style.display = (i === n) ? 'block' : 'none');
             tabs.forEach((t, i) => t.classList.toggle('active', i === n));
             
-            if (n === 1 && isAdminAuthenticated) {
+            // Pestaña índice 2 ahora es la de Escanear
+            if (n === 2 && isAdminAuthenticated) {
                 encenderEscaner();
             } else {
                 apagarEscaner();
@@ -419,8 +423,8 @@
                 } else {
                     nombreUltimoRegistro = nombre.replace(/\s+/g, '_');
                     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${codigo}`;
-                    document.getElementById('qr-ticket').src = qrUrl;
-                    document.getElementById('qr-container').style.display = 'flex';
+                    document.getElementById('qr-ticket-reg').src = qrUrl;
+                    document.getElementById('qr-container-reg').style.display = 'flex';
                     
                     alert(`✅ ¡Registro exitoso para ${nombre}!`);
                     
@@ -431,7 +435,6 @@
             });
         }
 
-        // FUNCIÓN NUEVA: RECUPERAR QR POR TELÉFONO
         function recuperarQR() {
             const telefonoBuscar = document.getElementById('telefono-recuperar').value.trim();
 
@@ -462,13 +465,14 @@
                 if (encontrado) {
                     nombreUltimoRegistro = nombreAsistente.replace(/\s+/g, '_');
                     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${codigoAsistente}`;
-                    document.getElementById('qr-ticket').src = qrUrl;
-                    document.getElementById('qr-container').style.display = 'flex';
+                    document.getElementById('qr-ticket-rec').src = qrUrl;
+                    document.getElementById('qr-container-rec').style.display = 'flex';
                     
                     alert(`✅ ¡QR Recuperado con éxito para: ${nombreAsistente}!`);
                     document.getElementById('telefono-recuperar').value = '';
                 } else {
                     alert("❌ No se encontró ningún registro asociado a ese número de teléfono.");
+                    document.getElementById('qr-container-rec').style.display = 'none';
                 }
             }).catch(err => {
                 toggleLoading(false);
@@ -476,9 +480,9 @@
             });
         }
 
-        function descargarQR() {
-            const imgElement = document.getElementById('qr-ticket');
-            if (!imgElement.src) return;
+        function descargarQR(imgElementId) {
+            const imgElement = document.getElementById(imgElementId);
+            if (!imgElement || !imgElement.src) return;
 
             fetch(imgElement.src)
                 .then(response => response.blob())
