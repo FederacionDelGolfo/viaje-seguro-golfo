@@ -15,10 +15,10 @@
 
     <style>
         :root {
-            --primary-bg: #0b0f19; /* Azul marino ultra profundo, casi negro */
-            --container-bg: #131927; /* Azul contenedor firme */
-            --primary-accent: #f5a623; /* Oro/Amarillo Imparables */
-            --secondary-accent: #ff6b4a; /* Naranja Fuego */
+            --primary-bg: #0b0f19;
+            --container-bg: #131927;
+            --primary-accent: #f5a623;
+            --secondary-accent: #ff6b4a;
             --success-color: #00b894;
             --error-color: #ff7675;
             --text-main: #ffffff;
@@ -235,8 +235,7 @@
         .status { padding: 8px 14px; border-radius: 30px; font-weight: 800; font-size: 11px; letter-spacing: 0.5px; }
         .verde .status { background-color: rgba(0, 184, 148, 0.15); color: var(--success-color); border: 1px solid rgba(0, 184, 148, 0.2); }
         .rojo .status { background-color: rgba(255, 118, 117, 0.15); color: var(--error-color); border: 1px solid rgba(255, 118, 117, 0.2); }
-        .time-badge { font-size: 11px; background: rgba(255,255,255,0.12); padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #fff;}
-
+        
         .btn-delete {
             background: rgba(255, 118, 117, 0.1);
             color: var(--error-color);
@@ -269,7 +268,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- ENCABEZADO CON LOGO -->
         <header>
             <img src="https://raw.githubusercontent.com/federaciondelgolfo/federaciondelgolfo.github.io/main/1000266768.png" alt="Imparables - Federación del Golfo" class="event-logo" onerror="this.src='1000266768.png'">
             <h1>🚍 Viaje Seguro - Federación del Golfo</h1>
@@ -289,13 +287,14 @@
             <input type="text" id="nombre" placeholder="NOMBRE COMPLETO" oninput="this.value = this.value.toUpperCase()">
             <input type="tel" id="telefono" placeholder="TELÉFONO" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <input type="text" id="distrito" placeholder="DISTRITO" oninput="this.value = this.value.toUpperCase()">
-            <button onclick="registrar()" class="success" id="btn-registrar">Registrar e Imprimir Boleto</button>
+            <!-- BOTÓN ACTUALIZADO AQUÍ -->
+            <button onclick="registrar()" class="success" id="btn-registrar">Registrar y Descargar QR</button>
             
             <div id="qr-container">
                 <div class="qr-box">
                     <img id="qr-ticket" src="" alt="Código QR de Acceso">
                 </div>
-                <button onclick="descargarQR()" class="download" id="btn-descargar">📥 Descargar Boleto QR</button>
+                <button onclick="descargarQR()" class="download" id="btn-descargar">📥 Descargar QR</button>
             </div>
         </div>
 
@@ -311,7 +310,7 @@
             </div>
 
             <div id="escanner-bloqueado">
-                <p>🔒 Esta pestaña está habilitada solo hasta el administrador.</p>
+                <p>🔒 Esta pestaña está habilitada solo para el administrador.</p>
                 <button onclick="autenticarAdministrador()" class="primary">Desbloquear</button>
             </div>
         </div>
@@ -406,7 +405,7 @@
                     document.getElementById('qr-ticket').src = qrUrl;
                     document.getElementById('qr-container').style.display = 'flex';
                     
-                    alert(`✅ ¡Registro completo para ${nombre}!`);
+                    alert(`✅ ¡Registro exitoso para ${nombre}!`);
                     
                     document.getElementById('nombre').value = '';
                     document.getElementById('telefono').value = '';
@@ -472,23 +471,21 @@
                 }
 
                 const persona = snapshot.val();
-                // Usamos la fecha limpia del día (ej: "07/07/2026")
                 const fechaActual = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
                 const horaActual = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
 
                 let historialCheckins = persona.checkins || {}; 
                 
                 if (historialCheckins[fechaActual]) {
-                    document.getElementById('qr-resultado-exito').innerHTML = `ℹ️ ${persona.nombre} ya tiene check-in hoy (${historialCheckins[fechaActual]})`;
+                    document.getElementById('qr-resultado-exito').innerHTML = `ℹ️ Ya tiene check-in hoy: ${historialCheckins[fechaActual]}`;
                     document.getElementById('qr-resultado-exito').style.color = "var(--primary-accent)";
                 } else {
                     historialCheckins[fechaActual] = horaActual;
 
                     db.ref('asistentes/' + codigoInput).update({
-                        checkins: historialCheckins,
-                        ultimoCheckin: `${fechaActual} ${hour=horaActual}`
+                        checkins: historialCheckins
                     }).then(() => {
-                        document.getElementById('qr-resultado-exito').innerHTML = `🎉 ✅ ¡BIENVENIDO! ${persona.nombre}`;
+                        document.getElementById('qr-resultado-exito').innerHTML = `🎉 ✅ ¡BIENVENIDO, ${persona.nombre}!`;
                         document.getElementById('qr-resultado-exito').style.color = "var(--success-color)";
                         try { navigator.vibrate(200); } catch(e){}
                     });
@@ -525,7 +522,7 @@
 
                 if (!snapshot.exists()) {
                     tabsContainer.innerHTML = "";
-                    panelesContainer.innerHTML = "<p style='text-align:center;color:var(--text-muted);'>No hay registros todavía.</p>";
+                    panelesContainer.innerHTML = "<p style='text-align:center;color:var(--text-muted);'>No hay registros.</p>";
                     return;
                 }
 
@@ -551,24 +548,23 @@
                         const diasRegistrados = Object.keys(historial);
                         const totalDias = diasRegistrados.length;
                         
-                        // Formatear las fechas guardadas para mostrarlas debajo del nombre
-                        let detalleFechas = totalDias > 0 ? "" : "Ninguna asistencia";
+                        let detalleFechas = "";
                         diasRegistrados.forEach(f => {
-                            detalleFechas += `📅 ${f} (${historial[f]}) `;
+                            detalleFechas += `📅 ${f} `;
                         });
 
                         panelesHtml += `
                             <div class="participant ${totalDias > 0 ? 'verde' : 'rojo'}" id="row-${p.codigo}">
                                 <div class="participant-info">
                                     <strong>${p.nombre || 'Desconocido'}</strong>
-                                    <div class="participant-info-sub">Tel: ${p.telefono || '-'} | Cód: ${p.codigo || '-'}</div>
-                                    <div style="font-size: 11px; margin-top: 5px; color: var(--primary-accent); font-weight:600;">${detalleFechas}</div>
+                                    <div class="participant-info-sub">Tel: ${p.telefono} | Cód: ${p.codigo}</div>
+                                    <div style="font-size: 11px; margin-top: 5px; color: var(--primary-accent);">${detalleFechas}</div>
                                 </div>
                                 <div class="participant-actions">
                                     <div class="status">
-                                        ${totalDias > 0 ? `✅ ${totalDias}/2 ASISTIDO` : '❌ PENDIENTE'}
+                                        ${totalDias > 0 ? `✅ ${totalDias}/2 DÍAS` : '❌ PENDIENTE'}
                                     </div>
-                                    <button class="btn-delete" onclick="eliminarRegistro('${p.codigo}', '${p.nombre}')" title="Eliminar asistente">🗑️</button>
+                                    <button class="btn-delete" onclick="eliminarRegistro('${p.codigo}', '${p.nombre}')">🗑️</button>
                                 </div>
                             </div>`;
                     });
