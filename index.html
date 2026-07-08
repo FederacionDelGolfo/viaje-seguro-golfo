@@ -53,13 +53,23 @@
 
         header {
             background-color: rgba(108, 92, 231, 0.1);
-            color: var(--primary-accent);
             padding: 30px 20px;
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
         }
 
-        header h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+        .event-logo {
+            max-width: 220px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+        }
+
+        header h1 { margin: 0; font-size: 22px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
 
         .tabs { display: flex; gap: 5px; padding: 15px; background-color: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-muted); border-radius: var(--radius-tab); transition: all 0.2s ease; }
@@ -122,7 +132,6 @@
         .qr-box { width: 180px; height: 180px; background: white; padding: 10px; border-radius: 8px; display: flex; justify-content: center; align-items: center; }
         .qr-box img { width: 100%; height: 100%; }
 
-        /* Estilo simplificado para el bloqueo de administrador */
         #escanner-bloqueado { text-align: center; padding: 40px 10px; color: var(--text-muted); }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -135,6 +144,7 @@
 <body>
     <div class="container">
         <header>
+            <img src="https://raw.githubusercontent.com/federaciondelgolfo/federaciondelgolfo.github.io/main/1000266768.png" alt="Imparables - Federación del Golfo" class="event-logo" onerror="this.src='1000266768.png'">
             <h1>🚍 Viaje Seguro - Federación del Golfo</h1>
         </header>
 
@@ -260,7 +270,7 @@
             }, (error) => {
                 toggleLoading(false);
                 if (error) {
-                    alert("Error en Firebase: " + error.message);
+                    alert("Error en Firebase (Revisa las reglas de seguridad): " + error.message);
                 } else {
                     nombreUltimoRegistro = nombre.replace(/\s+/g, '_');
                     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${codigo}`;
@@ -325,7 +335,7 @@
         function procesarCheckinAutomatico(codigoInput) {
             if (!codigoInput) return;
 
-            db.ref('asistentes/' + codigoInput).once('value').then((snapshot) => {
+            db.ref('asistentes/' + codigoInput).once('value', (snapshot) => {
                 if (!snapshot.exists()) {
                     document.getElementById('qr-resultado-exito').innerHTML = "❌ Código QR Inválido";
                     document.getElementById('qr-resultado-exito').style.color = "var(--error-color)";
@@ -349,6 +359,8 @@
                         try { navigator.vibrate(200); } catch(e){}
                     });
                 }
+            }, (error) => {
+                alert("Error de permisos en Firebase al verificar código.");
             });
         }
 
@@ -373,7 +385,7 @@
 
             toggleLoading(true);
 
-            db.ref('asistentes').once('value').then((snapshot) => {
+            db.ref('asistentes').once('value', (snapshot) => {
                 toggleLoading(false);
                 const tabsContainer = document.getElementById('distritos_tabs');
                 const panelesContainer = document.getElementById('distritos_paneles');
@@ -381,7 +393,7 @@
 
                 if (!snapshot.exists()) {
                     tabsContainer.innerHTML = "";
-                    panelesContainer.innerHTML = "<p>No hay registros todavía.</p>";
+                    panelesContainer.innerHTML = "<p style='text-align:center;color:var(--text-muted);'>No hay registros todavía.</p>";
                     return;
                 }
 
@@ -409,8 +421,8 @@
                         panelesHtml += `
                             <div class="participant ${esPresente ? 'verde' : 'rojo'}" id="row-${p.codigo}">
                                 <div class="participant-info">
-                                    <strong>${p.nombre}</strong>
-                                    <div class="participant-info-sub">Tel: ${p.telefono} | Cód: ${p.codigo}</div>
+                                    <strong>${p.nombre || 'Desconocido'}</strong>
+                                    <div class="participant-info-sub">Tel: ${p.telefono || '-'} | Cód: ${p.codigo || '-'}</div>
                                 </div>
                                 <div class="participant-actions">
                                     <div class="status">
@@ -425,6 +437,9 @@
 
                 tabsContainer.innerHTML = tabsHtml;
                 panelesContainer.innerHTML = panelesHtml;
+            }, (error) => {
+                toggleLoading(false);
+                alert("Error de lectura: Acceso denegado por reglas de Firebase.");
             });
         }
 
@@ -434,14 +449,21 @@
             db.ref('asistentes/' + codigo).remove().then(() => {
                 toggleLoading(false);
                 verLista();
+            }).catch((err) => {
+                toggleLoading(false);
+                alert("Error de borrado: Acceso denegado por reglas de Firebase.");
             });
         }
 
         function showDistritoTab(distritoSeleccionado) {
             document.querySelectorAll('.distrito-panel').forEach(panel => panel.classList.remove('active'));
             document.querySelectorAll('.distrito-tab').forEach(tab => tab.classList.remove('active'));
-            document.getElementById(`panel-dist-${distritoSeleccionado}`).classList.add('active');
-            document.getElementById(`tab-link-${distritoSeleccionado}`).classList.add('active');
+            if(document.getElementById(`panel-dist-${distritoSeleccionado}`)){
+                document.getElementById(`panel-dist-${distritoSeleccionado}`).classList.add('active');
+            }
+            if(document.getElementById(`tab-link-${distritoSeleccionado}`)){
+                document.getElementById(`tab-link-${distritoSeleccionado}`).classList.add('active');
+            }
         }
     </script>
 </body>
