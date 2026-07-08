@@ -139,6 +139,53 @@
             line-height: 1.5;
         }
 
+        /* --- ESTADÍSTICAS REAL-TIME --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 10px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .stat-box .num {
+            font-size: 24px;
+            font-weight: 900;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .stat-box .label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .stat-box.total .num { color: #fff; }
+        .stat-box.checked .num { color: var(--success-color); }
+        .stat-box.pending .num { color: var(--error-color); }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary-accent), var(--success-color));
+            transition: width 0.5s ease-in-out;
+        }
+        /* ------------------------------------- */
+
         input { 
             padding: 16px; 
             margin: 10px 0; 
@@ -337,10 +384,33 @@
 
         <div id="tab3" class="card">
             <h2>Lista de Participantes</h2>
-            <input type="password" id="pass" placeholder="Contraseña de acceso">
-            <button onclick="verLista()" class="primary">Ver Lista</button>
             
-            <div id="lista_container" style="margin-top:20px; display: none;">
+            <div id="admin-login-lista">
+                <input type="password" id="pass" placeholder="Contraseña de acceso">
+                <button onclick="verLista()" class="primary">Ver Lista</button>
+            </div>
+            
+            <div id="lista_container" style="margin-top:10px; display: none;">
+                
+                <div class="stats-grid">
+                    <div class="stat-box total">
+                        <span class="num" id="stat-total">0</span>
+                        <span class="label">Registrados</span>
+                    </div>
+                    <div class="stat-box checked">
+                        <span class="num" id="stat-abordados">0</span>
+                        <span class="label">Check-in Ok</span>
+                    </div>
+                    <div class="stat-box pending">
+                        <span class="num" id="stat-pendientes">0</span>
+                        <span class="label">Pendientes de check in</span>
+                    </div>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="stat-progreso"></div>
+                </div>
+
                 <div id="distritos_tabs" class="distritos-tabs-container"></div>
                 <div id="distritos_paneles"></div>
             </div>
@@ -370,7 +440,6 @@
             cards.forEach((c, i) => c.style.display = (i === n) ? 'block' : 'none');
             tabs.forEach((t, i) => t.classList.toggle('active', i === n));
             
-            // Pestaña índice 2 ahora es la de Escanear
             if (n === 2 && isAdminAuthenticated) {
                 encenderEscaner();
             } else {
@@ -577,6 +646,7 @@
             isAdminAuthenticated = true;
             document.getElementById('escanner-bloqueado').style.display = 'none';
             document.getElementById('escanner-contenido').style.display = 'block';
+            document.getElementById('admin-login-lista').style.display = 'none';
 
             toggleLoading(true);
 
@@ -589,16 +659,30 @@
                 if (!snapshot.exists()) {
                     tabsContainer.innerHTML = "";
                     panelesContainer.innerHTML = "<p style='text-align:center;color:var(--text-muted);'>No hay registros.</p>";
+                    actualizarContadoresDashboard(0, 0);
                     return;
                 }
+
+                let totalRegistrados = 0;
+                let totalAbordadosHoy = 0;
+                const fechaHoy = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
 
                 const porDistrito = {};
                 snapshot.forEach((childSnapshot) => {
                     const p = childSnapshot.val();
+                    totalRegistrados++;
+                    
+                    const historial = p.checkins || {};
+                    if (historial[fechaHoy]) {
+                        totalAbordadosHoy++;
+                    }
+
                     const distName = p.distrito || "SIN DISTRITO";
                     if (!porDistrito[distName]) porDistrito[distName] = [];
                     porDistrito[distName].push(p);
                 });
+
+                actualizarContadoresDashboard(totalRegistrados, totalAbordadosHoy);
 
                 const distritosOrdenados = Object.keys(porDistrito).sort();
                 let tabsHtml = "";
@@ -640,6 +724,16 @@
                 tabsContainer.innerHTML = tabsHtml;
                 panelesContainer.innerHTML = panelesHtml;
             });
+        }
+
+        function actualizarContadoresDashboard(total, abordados) {
+            const pendientes = total - abordados;
+            const porcentaje = total > 0 ? Math.round((abordados / total) * 100) : 0;
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-abordados').innerText = abordados;
+            document.getElementById('stat-pendientes').innerText = pendientes;
+            document.getElementById('stat-progreso').style.width = porcentaje + '%';
         }
 
         function eliminarRegistro(codigo, nombre) {
