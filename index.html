@@ -523,12 +523,14 @@
                 <div class="checkpoint-selector">
                     <label>📍 Selecciona el punto de control actual:</label>
                     <select id="punto-control-actual">
-                        <option value="Día 1 - Autobús">Día 1 - Al abordar Autobús 🚍</option>
-                        <option value="Día 1 - Evento">Día 1 - Al llegar al Evento 🏆</option>
-                        <option value="Día 1 - Hotel">Día 1 - Al llegar al Hotel 🏨</option>
-                        <option value="Día 2 - Autobús">Día 2 - Al abordar Autobús 🚍</option>
-                        <option value="Día 2 - Evento">Día 2 - Al llegar al Evento 🏆</option>
-                        <option value="Día 2 - Hotel">Día 2 - Al llegar al Hotel 🏨</option>
+                        <!-- NUEVOS PUNTOS DE CONTROL SOLICITADOS -->
+                        <option value="Viernes - Abordaje Mañana">Viernes - Abordaje Mañana 🌅</option>
+                        <option value="Viernes - Abordaje Rancho Nuevo">Viernes - Abordaje Rancho Nuevo 🌳</option>
+                        <option value="Viernes - Regreso Hotel Noche">Viernes - Regreso Hotel Noche 🏨</option>
+                        <option value="Sábado - Regreso Hotel Noche">Sábado - Regreso Hotel Noche 🏨</option>
+                        <option value="Domingo - Abordaje Hotel">Domingo - Abordaje Hotel 🚍</option>
+                        <option value="Domingo - Abordaje Cañón">Domingo - Abordaje Cañón ⛰️</option>
+                        <option value="Domingo - Abordaje Plaza">Domingo - Abordaje Plaza 🛒</option>
                     </select>
                 </div>
 
@@ -798,7 +800,7 @@
                     db.ref('asistentes/' + codigoInput).update({
                         checkins: historialCheckins
                     }).then(() => {
-                        document.getElementById('qr-resultado-exito').innerHTML = `🎉 ✅ ¡${puntoControl} OK para ${persona.nombre}!`;
+                        document.getElementById('qr-resultado-exito').innerHTML = `🎉 ✅ ¡OK en: ${puntoControl} para ${persona.nombre}!`;
                         document.getElementById('qr-resultado-exito').style.color = "var(--success-color)";
                         try { navigator.vibrate(200); } catch(e){}
                     });
@@ -887,7 +889,6 @@
                     const classActive = isActive ? 'active' : '';
                     const displayStyle = isActive ? 'block' : 'none';
                     
-                    // NUEVA LÓGICA: Contar cuántos faltan por iniciar check-in en ESTE distrito
                     const totalAsistentesDistrito = porDistrito[dist].length;
                     let faltantesDistrito = 0;
 
@@ -912,14 +913,16 @@
                         let detallePuntos = "";
                         puntosListados.sort().forEach(punto => {
                             let icono = "📍";
-                            if(punto.includes("Autobús")) icono = "🚍";
-                            if(punto.includes("Evento")) icono = "🏆";
-                            if(punto.includes("Hotel")) icono = "🏨";
+                            if(punto.includes("Abordaje") || punto.includes("Mañana")) icono = "🚍";
+                            if(punto.includes("Hotel") || punto.includes("Noche")) icono = "🏨";
+                            if(punto.includes("Cañón")) icono = "⛰️";
+                            if(punto.includes("Plaza")) icono = "🛒";
                             detallePuntos += `<span style="display:inline-block; margin-right:8px; font-size:11px; background:rgba(255,255,255,0.05); padding:3px 6px; border-radius:6px; color:#fff;">${icono} ${punto}: <b>${historial[punto]}</b></span>`;
                         });
 
                         let claseColor = "rojo";
-                        if (totalPuntosPersona === 6) claseColor = "verde";
+                        // Máximo 7 controles totales ahora
+                        if (totalPuntosPersona === 7) claseColor = "verde";
                         else if (totalPuntosPersona > 0) claseColor = "amarillo";
 
                         panelesHtml += `
@@ -931,7 +934,7 @@
                                 </div>
                                 <div class="participant-actions">
                                     <div class="status">
-                                        ${totalPuntosPersona}/6 CONTROLES
+                                        ${totalPuntosPersona}/7 CONTROLES
                                     </div>
                                     <button class="btn-edit" onclick="editarRegistro('${p.codigo}', '${p.nombre}', '${p.telefono}', '${p.distrito}')" title="Editar Asistente">✏️</button>
                                     <button class="btn-delete" onclick="eliminarRegistro('${p.codigo}', '${p.nombre}')" title="Eliminar Asistente">🗑️</button>
