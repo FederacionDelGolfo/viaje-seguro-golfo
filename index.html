@@ -175,7 +175,7 @@
             height: 8px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 4px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             overflow: hidden;
         }
         .progress-bar-fill {
@@ -184,7 +184,22 @@
             background: linear-gradient(90deg, var(--secondary-accent), var(--success-color));
             transition: width 0.5s ease-in-out;
         }
-        /* ------------------------------------- */
+
+        /* --- NUEVO: BARRA DE BÚSQUEDA --- */
+        .search-container {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .search-container input {
+            margin: 0;
+            padding: 14px 16px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(245, 166, 35, 0.3);
+        }
+        .search-container input:focus {
+            border-color: var(--primary-accent);
+        }
+        /* --------------------------------- */
 
         input { 
             padding: 16px; 
@@ -280,6 +295,7 @@
             justify-content: space-between; 
             align-items: center; 
             border: 1px solid rgba(255,255,255,0.03); 
+            transition: opacity 0.2s, transform 0.2s;
         }
         .participant-actions { display: flex; align-items: center; gap: 15px; }
         .participant strong { font-size: 16px; color: var(--text-main); letter-spacing: 0.3px; }
@@ -409,6 +425,10 @@
 
                 <div class="progress-bar-container">
                     <div class="progress-bar-fill" id="stat-progreso"></div>
+                </div>
+
+                <div class="search-container">
+                    <input type="text" id="lista-busqueda" placeholder="🔍 BUSCAR ASISTENTE (NOMBRE, TELÉFONO O CÓDIGO)..." oninput="filtrarListaGlobal()">
                 </div>
 
                 <div id="distritos_tabs" class="distritos-tabs-container"></div>
@@ -704,7 +724,7 @@
                         });
 
                         panelesHtml += `
-                            <div class="participant ${totalDias > 0 ? 'verde' : 'rojo'}" id="row-${p.codigo}">
+                            <div class="participant ${totalDias > 0 ? 'verde' : 'rojo'}" id="row-${p.codigo}" data-string="${p.nombre} ${p.telefono} ${p.codigo}">
                                 <div class="participant-info">
                                     <strong>${p.nombre || 'Desconocido'}</strong>
                                     <div class="participant-info-sub">Tel: ${p.telefono} | Cód: ${p.codigo}</div>
@@ -723,6 +743,53 @@
 
                 tabsContainer.innerHTML = tabsHtml;
                 panelesContainer.innerHTML = panelesHtml;
+                
+                // Si había algún texto en el buscador, aplicar el filtro de nuevo
+                filtrarListaGlobal();
+            });
+        }
+
+        // NUEVA FUNCIÓN: Filtra en tiempo real los asistentes dinámicamente
+        function filtrarListaGlobal() {
+            const query = document.getElementById('lista-busqueda').value.toLowerCase().trim();
+            const participantes = document.querySelectorAll('.participant');
+            const tabsContainer = document.getElementById('distritos_tabs');
+
+            if (query === "") {
+                // Si la búsqueda está vacía, mostrar pestañas de distritos con normalidad y restaurar estados
+                tabsContainer.style.display = 'flex';
+                participantes.forEach(p => p.style.display = 'flex');
+                
+                // Mantener el panel activo seleccionado
+                const tabActiva = document.querySelector('.distrito-tab.active');
+                if (tabActiva) {
+                    const dist = tabActiva.id.replace('tab-link-', '');
+                    showDistritoTab(dist);
+                }
+                return;
+            }
+
+            // Ocultar la barra de distritos porque se buscará en toda la base de datos simultáneamente
+            tabsContainer.style.display = 'none';
+
+            participantes.forEach(p => {
+                const searchString = p.getAttribute('data-string').toLowerCase();
+                const parentPanel = p.parentElement;
+                
+                if (searchString.includes(query)) {
+                    p.style.display = 'flex';
+                    parentPanel.style.display = 'block'; // Asegura que el contenedor del distrito sea visible
+                } else {
+                    p.style.display = 'none';
+                }
+            });
+
+            // Ocultar paneles de distritos que queden completamente vacíos en la búsqueda actual
+            document.querySelectorAll('.distrito-panel').forEach(panel => {
+                const hijosVisibles = Array.from(panel.children).filter(child => child.style.display !== 'none');
+                if (hijosVisibles.length === 0) {
+                    panel.style.display = 'none';
+                }
             });
         }
 
@@ -746,14 +813,22 @@
         }
 
         function showDistritoTab(distritoSeleccionado) {
+            // Solo aplicar el tab toggle si el buscador global está vacío
+            if (document.getElementById('lista-busqueda').value.trim() !== "") return;
+
             document.querySelectorAll('.distrito-panel').forEach(panel => panel.classList.remove('active'));
             document.querySelectorAll('.distrito-tab').forEach(tab => tab.classList.remove('active'));
-            if(document.getElementById(`panel-dist-${distritoSeleccionado}`)){
-                document.getElementById(`panel-dist-${distritoSeleccionado}`).classList.add('active');
-            }
-            if(document.getElementById(`tab-link-${distritoSeleccionado}`)){
-                document.getElementById(`tab-link-${distritoSeleccionado}`).classList.add('active');
-            }
+            
+            const panel = document.getElementById(`panel-dist-${distritoSeleccionado}`);
+            const tab = document.getElementById(`tab-link-${distritoSeleccionado}`);
+            
+            if(panel) { panel.classList.add('active'); panel.style.display = 'block'; }
+            if(tab) tab.classList.add('active');
+
+            // Ocultar los demás paneles para que funcione la navegación por pestañas de manera estricta
+            document.querySelectorAll('.distrito-panel').forEach(p => {
+                if(p.id !== `panel-dist-${distritoSeleccionado}`) p.style.display = 'none';
+            });
         }
     </script>
 </body>
