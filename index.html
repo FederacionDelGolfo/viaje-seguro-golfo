@@ -139,6 +139,42 @@
             line-height: 1.5;
         }
 
+        /* --- MEJORA: LOGIN DE ACCESO ADMIN --- */
+        .admin-lockbox {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px 25px;
+            text-align: center;
+            max-width: 420px;
+            margin: 20px auto;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+        .lock-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            display: inline-block;
+            filter: drop-shadow(0 2px 8px rgba(245, 166, 35, 0.3));
+        }
+        .admin-lockbox h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+        .admin-lockbox p {
+            margin: 0 0 20px 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .admin-lockbox input {
+            text-align: center;
+            letter-spacing: 4px;
+            font-weight: bold;
+            border-color: rgba(255,255,255,0.15);
+        }
+        /* ------------------------------------- */
+
         /* --- ESTADÍSTICAS REAL-TIME --- */
         .stats-grid {
             display: grid;
@@ -185,7 +221,6 @@
             transition: width 0.5s ease-in-out;
         }
 
-        /* --- NUEVO: BARRA DE BÚSQUEDA --- */
         .search-container {
             margin-bottom: 20px;
             position: relative;
@@ -199,7 +234,6 @@
         .search-container input:focus {
             border-color: var(--primary-accent);
         }
-        /* --------------------------------- */
 
         input { 
             padding: 16px; 
@@ -322,7 +356,7 @@
         #qr-resultado-exito { text-align: center; color: var(--success-color); font-weight: bold; font-size: 18px; margin: 15px 0; min-height: 24px; }
         #loading { text-align: center; color: var(--primary-accent); font-weight: bold; margin: 10px 0; display: none;}
         
-        .qr-display-container { display: none; flex-direction: column; align-items: center; background: rgba(0,0,0,0.3); padding: 25px; margin: 25px auto 0; border-radius: 16px; border: 1px solid rgba(245,166,35,0.2); max-width: 240px; }
+        .qr-display-container { display: none; flex-direction: column; align-items: center; background: rgba(0,0,0,0.3); padding: 25px; margin: 25px auto 0; border-radius: 16px; border: 1px solid rgba(245, 166, 35, 0.2); max-width: 240px; }
         .qr-box { width: 180px; height: 180px; background: white; padding: 12px; border-radius: 12px; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .qr-box img { width: 100%; height: 100%; }
 
@@ -393,8 +427,12 @@
             </div>
 
             <div id="escanner-bloqueado">
-                <p>🔒 Esta pestaña está habilitada solo para el administrador.</p>
-                <button onclick="autenticarAdministrador()" class="primary">Desbloquear</button>
+                <div class="admin-lockbox">
+                    <span class="lock-icon">🔒</span>
+                    <h3>Sección Protegida</h3>
+                    <p>Esta pestaña está habilitada solo para el personal administrativo.</p>
+                    <button onclick="autenticarAdministrador()" class="primary">Desbloquear Cámara</button>
+                </div>
             </div>
         </div>
 
@@ -402,8 +440,13 @@
             <h2>Lista de Participantes</h2>
             
             <div id="admin-login-lista">
-                <input type="password" id="pass" placeholder="Contraseña de acceso">
-                <button onclick="verLista()" class="primary">Ver Lista</button>
+                <div class="admin-lockbox">
+                    <span class="lock-icon">🔐</span>
+                    <h3>Acceso de Administrador</h3>
+                    <p>Introduce la clave de la Federación para visualizar el listado en tiempo real.</p>
+                    <input type="password" id="pass" placeholder="••••••••" onkeydown="if(event.key === 'Enter') verLista()">
+                    <button onclick="verLista()" class="primary" style="margin-top:15px; margin-bottom:0;">Ingresar al Panel</button>
+                </div>
             </div>
             
             <div id="lista_container" style="margin-top:10px; display: none;">
@@ -744,23 +787,19 @@
                 tabsContainer.innerHTML = tabsHtml;
                 panelesContainer.innerHTML = panelesHtml;
                 
-                // Si había algún texto en el buscador, aplicar el filtro de nuevo
                 filtrarListaGlobal();
             });
         }
 
-        // NUEVA FUNCIÓN: Filtra en tiempo real los asistentes dinámicamente
         function filtrarListaGlobal() {
             const query = document.getElementById('lista-busqueda').value.toLowerCase().trim();
             const participantes = document.querySelectorAll('.participant');
             const tabsContainer = document.getElementById('distritos_tabs');
 
             if (query === "") {
-                // Si la búsqueda está vacía, mostrar pestañas de distritos con normalidad y restaurar estados
                 tabsContainer.style.display = 'flex';
                 participantes.forEach(p => p.style.display = 'flex');
                 
-                // Mantener el panel activo seleccionado
                 const tabActiva = document.querySelector('.distrito-tab.active');
                 if (tabActiva) {
                     const dist = tabActiva.id.replace('tab-link-', '');
@@ -769,7 +808,6 @@
                 return;
             }
 
-            // Ocultar la barra de distritos porque se buscará en toda la base de datos simultáneamente
             tabsContainer.style.display = 'none';
 
             participantes.forEach(p => {
@@ -778,13 +816,12 @@
                 
                 if (searchString.includes(query)) {
                     p.style.display = 'flex';
-                    parentPanel.style.display = 'block'; // Asegura que el contenedor del distrito sea visible
+                    parentPanel.style.display = 'block';
                 } else {
                     p.style.display = 'none';
                 }
             });
 
-            // Ocultar paneles de distritos que queden completamente vacíos en la búsqueda actual
             document.querySelectorAll('.distrito-panel').forEach(panel => {
                 const hijosVisibles = Array.from(panel.children).filter(child => child.style.display !== 'none');
                 if (hijosVisibles.length === 0) {
@@ -813,7 +850,6 @@
         }
 
         function showDistritoTab(distritoSeleccionado) {
-            // Solo aplicar el tab toggle si el buscador global está vacío
             if (document.getElementById('lista-busqueda').value.trim() !== "") return;
 
             document.querySelectorAll('.distrito-panel').forEach(panel => panel.classList.remove('active'));
@@ -825,7 +861,6 @@
             if(panel) { panel.classList.add('active'); panel.style.display = 'block'; }
             if(tab) tab.classList.add('active');
 
-            // Ocultar los demás paneles para que funcione la navegación por pestañas de manera estricta
             document.querySelectorAll('.distrito-panel').forEach(p => {
                 if(p.id !== `panel-dist-${distritoSeleccionado}`) p.style.display = 'none';
             });
