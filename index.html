@@ -33,7 +33,6 @@
             margin: 0;
             padding: 20px;
             background-color: var(--primary-bg);
-            /* Degradado de fondo inspirado en la antorcha y energía del logo */
             background-image: 
                 radial-gradient(at 50% 0%, rgba(245, 166, 35, 0.15) 0px, transparent 50%),
                 radial-gradient(at 0% 100%, rgba(255, 107, 74, 0.08) 0px, transparent 40%);
@@ -51,7 +50,7 @@
             border-radius: var(--radius-main);
             box-shadow: 0 25px 50px rgba(0,0,0,0.6);
             overflow: hidden;
-            border: 2px solid rgba(245, 166, 35, 0.1); /* Borde dorado sutil */
+            border: 2px solid rgba(245, 166, 35, 0.1); 
         }
 
         header {
@@ -270,7 +269,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- ENCABEZADO CON LOGO MEJORADO -->
+        <!-- ENCABEZADO CON LOGO -->
         <header>
             <img src="https://raw.githubusercontent.com/federaciondelgolfo/federaciondelgolfo.github.io/main/1000266768.png" alt="Imparables - Federación del Golfo" class="event-logo" onerror="this.src='1000266768.png'">
             <h1>🚍 Viaje Seguro - Federación del Golfo</h1>
@@ -395,8 +394,7 @@
                 distrito: distrito,
                 telefono: telefono,
                 codigo: codigo,
-                checkin: "No",
-                checkinFecha: "",
+                checkins: {},
                 fechaRegistro: new Date().toLocaleString('es-MX')
             }, (error) => {
                 toggleLoading(false);
@@ -474,18 +472,23 @@
                 }
 
                 const persona = snapshot.val();
-                if (persona.checkin === "Si") {
-                    document.getElementById('qr-resultado-exito').innerHTML = `ℹ️ ${persona.nombre} ya tiene check-in`;
+                // Usamos la fecha limpia del día (ej: "07/07/2026")
+                const fechaActual = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
+                const horaActual = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+
+                let historialCheckins = persona.checkins || {}; 
+                
+                if (historialCheckins[fechaActual]) {
+                    document.getElementById('qr-resultado-exito').innerHTML = `ℹ️ ${persona.nombre} ya tiene check-in hoy (${historialCheckins[fechaActual]})`;
                     document.getElementById('qr-resultado-exito').style.color = "var(--primary-accent)";
                 } else {
-                    const ahora = new Date();
-                    const horaLimpia = ahora.toLocaleDateString('es-MX') + ' ' + ahora.toLocaleTimeString('es-MX');
+                    historialCheckins[fechaActual] = horaActual;
 
                     db.ref('asistentes/' + codigoInput).update({
-                        checkin: "Si",
-                        checkinFecha: horaLimpia
+                        checkins: historialCheckins,
+                        ultimoCheckin: `${fechaActual} ${hour=horaActual}`
                     }).then(() => {
-                        document.getElementById('qr-resultado-exito').innerHTML = `🎉 ✅ ¡BIENVENIDO, ${persona.nombre}!`;
+                        document.getElementById('qr-resultado-exito').innerHTML = `🎉 ✅ ¡BIENVENIDO! ${persona.nombre}`;
                         document.getElementById('qr-resultado-exito').style.color = "var(--success-color)";
                         try { navigator.vibrate(200); } catch(e){}
                     });
@@ -544,18 +547,26 @@
                     
                     panelesHtml += `<div class="distrito-panel ${isActive}" id="panel-dist-${dist}">`;
                     porDistrito[dist].forEach(p => {
-                        const esPresente = p.checkin === "Si";
-                        const horaCheckin = esPresente && p.checkinFecha ? p.checkinFecha.split(' ')[1] : '';
+                        const historial = p.checkins || {};
+                        const diasRegistrados = Object.keys(historial);
+                        const totalDias = diasRegistrados.length;
                         
+                        // Formatear las fechas guardadas para mostrarlas debajo del nombre
+                        let detalleFechas = totalDias > 0 ? "" : "Ninguna asistencia";
+                        diasRegistrados.forEach(f => {
+                            detalleFechas += `📅 ${f} (${historial[f]}) `;
+                        });
+
                         panelesHtml += `
-                            <div class="participant ${esPresente ? 'verde' : 'rojo'}" id="row-${p.codigo}">
+                            <div class="participant ${totalDias > 0 ? 'verde' : 'rojo'}" id="row-${p.codigo}">
                                 <div class="participant-info">
                                     <strong>${p.nombre || 'Desconocido'}</strong>
                                     <div class="participant-info-sub">Tel: ${p.telefono || '-'} | Cód: ${p.codigo || '-'}</div>
+                                    <div style="font-size: 11px; margin-top: 5px; color: var(--primary-accent); font-weight:600;">${detalleFechas}</div>
                                 </div>
                                 <div class="participant-actions">
                                     <div class="status">
-                                        ${esPresente ? `✅ LISTO <span class="time-badge">${horaCheckin}</span>` : '❌ PENDIENTE'}
+                                        ${totalDias > 0 ? `✅ ${totalDias}/2 ASISTIDO` : '❌ PENDIENTE'}
                                     </div>
                                     <button class="btn-delete" onclick="eliminarRegistro('${p.codigo}', '${p.nombre}')" title="Eliminar asistente">🗑️</button>
                                 </div>
