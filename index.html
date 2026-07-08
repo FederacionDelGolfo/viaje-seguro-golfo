@@ -81,6 +81,7 @@
         .distrito-panel.active { display: block; animation: fadeIn 0.3s ease; }
 
         .participant { padding: 18px; background-color: rgba(255,255,255,0.03); margin: 12px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.03); }
+        .participant-actions { display: flex; align-items: center; gap: 15px; }
         .participant strong { font-size: 16px; color: var(--text-main); }
         .participant-info-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
         .status { padding: 8px 14px; border-radius: 30px; font-weight: 700; font-size: 12px; }
@@ -89,10 +90,30 @@
         .rojo .status { background-color: rgba(255, 118, 117, 0.15); color: var(--error-color); }
         .time-badge { font-size: 11px; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #fff;}
 
+        .btn-delete {
+            background: rgba(255, 118, 117, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(255, 118, 117, 0.2);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0;
+            width: auto;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover {
+            background: var(--error-color);
+            color: white;
+        }
+
         #loading { display: none; text-align: center; color: var(--secondary-accent); font-weight: bold; margin: 10px 0; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @media (max-width: 600px) { .participant { flex-direction: column; align-items: flex-start; gap: 12px; } .status { align-self: flex-end; } }
+        @media (max-width: 600px) { 
+            .participant { flex-direction: column; align-items: flex-start; gap: 12px; } 
+            .participant-actions { width: 100%; justify-content: space-between; }
+        }
     </style>
 </head>
 <body>
@@ -112,7 +133,7 @@
         <div id="tab0" class="card" style="display: block;">
             <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="NOMBRE COMPLETO" oninput="this.value = this.value.toUpperCase()">
-            <input type="tel" id="telefono" placeholder="Teléfono (opcional)">
+            <input type="tel" id="telefono" placeholder="TELÉFONO (OBLIGATORIO)" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <input type="text" id="distrito" placeholder="DISTRITO" oninput="this.value = this.value.toUpperCase()">
             <button onclick="registrar()" class="success" id="btn-registrar">Registrarme</button>
         </div>
@@ -157,8 +178,14 @@
             const telefono = document.getElementById('telefono').value.trim();
             const distrito = document.getElementById('distrito').value.trim().toUpperCase();
 
-            if (!nombre || !distrito) {
-                alert("⚠️ Por favor, rellena Nombre y Distrito.");
+            // Nueva validación estricta de campos obligatorios
+            if (!nombre || !telefono || !distrito) {
+                alert("⚠️ Por favor, rellena todos los campos. El teléfono ahora es obligatorio.");
+                return;
+            }
+
+            if (telefono.length < 8) {
+                alert("⚠️ Por favor, ingresa un número de teléfono válido.");
                 return;
             }
 
@@ -172,7 +199,7 @@
                     data: [{
                         nombre,
                         distrito,
-                        telefono: telefono || "-",
+                        telefono,
                         codigo,
                         checkin: "No",
                         checkinFecha: "",
@@ -217,7 +244,7 @@
                     document.getElementById('codigo').value = '';
                 } else {
                     const ahora = new Date();
-                    const horaLimpia = ahora.toLocaleDateString('es-MX') + ' ' + ahora.toLocaleTimeString('es-MX');
+                    const horaLimpia = ahora.toLocaleDateString('es-MX') + ' ' + algo || ahora.toLocaleTimeString('es-MX');
 
                     fetch(`${SHEETDB_URL}/codigo/${codigoInput}`, {
                         method: 'PATCH',
@@ -287,13 +314,16 @@
                         const horaCheckin = esPresente && p.checkinFecha ? p.checkinFecha.split(' ')[1] : '';
                         
                         panelesHtml += `
-                            <div class="participant ${esPresente ? 'verde' : 'rojo'}">
+                            <div class="participant ${esPresente ? 'verde' : 'rojo'}" id="row-${p.codigo}">
                                 <div class="participant-info">
                                     <strong>${p.nombre}</strong>
                                     <div class="participant-info-sub">Tel: ${p.telefono} | Cód: ${p.codigo}</div>
                                 </div>
-                                <div class="status">
-                                    ${esPresente ? `✅ LISTO <span class="time-badge">${horaCheckin}</span>` : '❌ PENDIENTE'}
+                                <div class="participant-actions">
+                                    <div class="status">
+                                        ${esPresente ? `✅ LISTO <span class="time-badge">${horaCheckin}</span>` : '❌ PENDIENTE'}
+                                    </div>
+                                    <button class="btn-delete" onclick="eliminarRegistro('${p.codigo}', '${p.nombre}')" title="Eliminar asistente">🗑️</button>
                                 </div>
                             </div>`;
                     });
@@ -306,6 +336,30 @@
             .catch(err => {
                 toggleLoading(false);
                 alert("Error al cargar la lista: " + err);
+            });
+        }
+
+        // Nueva función para borrar registros directo de Google Sheets usando el código único
+        function eliminarRegistro(codigo, nombre) {
+            const confirmar = confirm(`⚠️ ¿Estás seguro de que deseas eliminar permanentemente a "${nombre}" de la lista y del Excel?`);
+            if (!confirmar) return;
+
+            toggleLoading(true);
+
+            fetch(`${SHEETDB_URL}/codigo/${codigo}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(response => {
+                toggleLoading(false);
+                alert(`🗑️ Registro de "${nombre}" eliminado correctamente.`);
+                // Recargar la lista visual para actualizar los distritos y los contadores
+                verLista();
+            })
+            .catch(err => {
+                toggleLoading(false);
+                alert("Error al eliminar el registro: " + err);
             });
         }
 
