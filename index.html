@@ -6,8 +6,11 @@
     <title>Imparables - Federación del Golfo</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     
+    <!-- Scripts de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
+    <!-- Librería del Escáner QR integrada -->
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
@@ -17,48 +20,256 @@
             --primary-accent: #f5a623;
             --secondary-accent: #ff6b4a;
             --success-color: #00b894;
+            --error-color: #ff7675;
             --text-main: #ffffff;
             --text-muted: #a4b0be;
+            --font-main: 'Inter', sans-serif;
             --radius-main: 20px;
+            --radius-tab: 12px;
         }
 
-        body { font-family: 'Inter', sans-serif; margin: 0; padding: 20px; background-color: var(--primary-bg); color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; align-items: center; box-sizing: border-box; }
-        .container { width: 100%; max-width: 750px; background-color: var(--container-bg); border-radius: var(--radius-main); box-shadow: 0 25px 50px rgba(0,0,0,0.6); overflow: hidden; border: 2px solid rgba(245, 166, 35, 0.1); }
-        
-        header { background: linear-gradient(180deg, rgba(245, 166, 35, 0.08) 0%, transparent 100%); padding: 35px 20px 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .event-logo { max-width: 260px; height: auto; animation: floating 3s ease-in-out infinite; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6)); }
-        @keyframes floating { 0% { transform: translateY(0px); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0px); } }
-        header h1 { margin: 15px 0 0; font-size: 20px; font-weight: 900; color: var(--primary-accent); text-transform: uppercase; }
+        body {
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 20px;
+            background-color: var(--primary-bg);
+            background-image: 
+                radial-gradient(at 50% 0%, rgba(245, 166, 35, 0.15) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(255, 107, 74, 0.08) 0px, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-        .tabs { display: flex; gap: 8px; padding: 15px; background-color: rgba(0, 0, 0, 0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .tab { flex: 1; padding: 14px; text-align: center; cursor: pointer; font-weight: 700; color: var(--text-muted); border-radius: 12px; text-transform: uppercase; font-size: 14px; transition: all 0.2s; }
-        .tab.active { background-color: var(--primary-accent); color: #0b0f19; font-weight: 900; box-shadow: 0 4px 12px rgba(245, 166, 35, 0.2); }
+        .container {
+            width: 100%;
+            max-width: 750px;
+            background-color: var(--container-bg);
+            border-radius: var(--radius-main);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            overflow: hidden;
+            border: 2px solid rgba(245, 166, 35, 0.1); 
+        }
+
+        header {
+            background: linear-gradient(180deg, rgba(245, 166, 35, 0.08) 0%, rgba(0,0,0,0) 100%);
+            padding: 35px 20px 25px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .event-logo {
+            max-width: 260px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6));
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        header h1 { 
+            margin: 0; 
+            font-size: 20px; 
+            font-weight: 900; 
+            color: var(--primary-accent); 
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .tabs { 
+            display: flex; 
+            gap: 8px; 
+            padding: 15px; 
+            background-color: rgba(0, 0, 0, 0.2); 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+        }
         
+        .tab { 
+            flex: 1; 
+            padding: 14px; 
+            text-align: center; 
+            cursor: pointer; 
+            font-weight: 700; 
+            font-size: 14px; 
+            color: var(--text-muted); 
+            border-radius: var(--radius-tab); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid transparent;
+        }
+        .tab:hover { 
+            background-color: rgba(245, 166, 35, 0.05); 
+            color: var(--primary-accent); 
+        }
+        .tab.active { 
+            background-color: var(--primary-accent); 
+            color: #0b0f19; 
+            box-shadow: 0 6px 15px rgba(245, 166, 35, 0.3);
+            font-weight: 900;
+        }
+
         .card { padding: 35px 30px; display: none; }
-        input { padding: 16px; margin: 10px 0; width: 100%; border-radius: 12px; background-color: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255,255,255,0.1); color: white; box-sizing: border-box; font-size: 15px; transition: border 0.2s; }
-        input:focus { outline: none; border-color: var(--primary-accent); }
         
-        button { padding: 16px; margin: 15px 0 5px; width: 100%; border-radius: 12px; font-weight: 900; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.1s; }
-        button:active { transform: scale(0.98); }
-        .success { background: linear-gradient(135deg, #ff6b4a 0%, #e04d2b 100%); color: white; }
-        .primary { background: var(--primary-accent); color: #0b0f19; }
-        .download { background: transparent; color: var(--primary-accent); border: 2px solid var(--primary-accent); margin-top: 15px; }
-        
-        /* CONTADORES Y MÉTRICAS */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .stat-card div:first-child { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-        .stat-card div:last-child { font-size: 24px; font-weight: 900; color: var(--primary-accent); margin-top: 5px; }
+        h2 { 
+            margin-top: 0; 
+            margin-bottom: 25px; 
+            font-size: 22px; 
+            font-weight: 700; 
+            color: var(--text-main);
+            border-left: 4px solid var(--secondary-accent);
+            padding-left: 12px;
+        }
 
-        .participant { padding: 18px; background: rgba(0,0,0,0.2); margin: 12px 0; border-radius: 14px; border-left: 4px solid var(--primary-accent); border-top: 1px solid rgba(255,255,255,0.02); }
-        .participant-meta { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-        .participant-times { color: var(--primary-accent); font-size: 12px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; }
+        input { 
+            padding: 16px; 
+            margin: 10px 0; 
+            width: 100%; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            box-sizing: border-box; 
+            background-color: rgba(0, 0, 0, 0.25); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            color: var(--text-main); 
+            transition: all 0.2s; 
+        }
+        input:focus { 
+            outline: none; 
+            border-color: var(--primary-accent); 
+            box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.15); 
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        button { 
+            padding: 16px; 
+            margin: 20px 0 10px; 
+            width: 100%; 
+            border-radius: 12px; 
+            font-size: 15px; 
+            font-weight: 900; 
+            border: none; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        
+        button.primary { 
+            background: linear-gradient(135deg, var(--primary-accent) 0%, #d48a17 100%); 
+            color: #0b0f19; 
+        }
+        button.primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(245,166,35,0.3); }
+        
+        button.success { 
+            background: linear-gradient(135deg, var(--secondary-accent) 0%, #e04d2b 100%); 
+            color: white; 
+        }
+        button.success:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,107,74,0.3); }
+        
+        button.download { 
+            background-color: transparent; 
+            color: var(--primary-accent); 
+            border: 2px solid var(--primary-accent);
+            margin-top: 15px; 
+        }
+        button.download:hover { background-color: var(--primary-accent); color: #0b0f19; }
+
+        #reader { 
+            width: 100%; 
+            max-width: 400px; 
+            margin: 0 auto; 
+            border-radius: 16px; 
+            overflow: hidden; 
+            border: 3px dashed var(--primary-accent); 
+            background: #000; 
+        }
+
+        .distritos-tabs-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .distrito-tab { 
+            padding: 8px 16px; 
+            background-color: rgba(255,255,255,0.05); 
+            color: var(--text-muted); 
+            border-radius: 20px; 
+            font-size: 13px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .distrito-tab.active { 
+            background-color: rgba(245, 166, 35, 0.15); 
+            color: var(--primary-accent); 
+            border-color: var(--primary-accent);
+        }
+
+        .distrito-panel { display: none; }
+        .distrito-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+        .participant { 
+            padding: 18px; 
+            background-color: rgba(0, 0, 0, 0.2); 
+            margin: 12px 0; 
+            border-radius: 14px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border: 1px solid rgba(255,255,255,0.03); 
+        }
+        .participant-actions { display: flex; align-items: center; gap: 15px; }
+        .participant strong { font-size: 16px; color: var(--text-main); letter-spacing: 0.3px; }
+        .participant-info-sub { font-size: 13px; color: var(--text-muted); margin-top: 5px; }
+        
+        .status { padding: 8px 14px; border-radius: 30px; font-weight: 800; font-size: 11px; letter-spacing: 0.5px; }
+        .verde .status { background-color: rgba(0, 184, 148, 0.15); color: var(--success-color); border: 1px solid rgba(0, 184, 148, 0.2); }
+        .rojo .status { background-color: rgba(255, 118, 117, 0.15); color: var(--error-color); border: 1px solid rgba(255, 118, 117, 0.2); }
+        
+        .btn-delete {
+            background: rgba(255, 118, 117, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(255, 118, 117, 0.15);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0;
+            width: auto;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover { background: var(--error-color); color: white; }
+
+        #qr-resultado-exito { text-align: center; color: var(--success-color); font-weight: bold; font-size: 18px; margin: 15px 0; min-height: 24px; }
+        #loading { text-align: center; color: var(--primary-accent); font-weight: bold; margin: 10px 0; display: none;}
+        
+        #qr-container { display: none; flex-direction: column; align-items: center; background: rgba(0,0,0,0.3); padding: 25px; margin: 25px auto 0; border-radius: 16px; border: 1px solid rgba(245,166,35,0.2); max-width: 240px; }
+        .qr-box { width: 180px; height: 180px; background: white; padding: 12px; border-radius: 12px; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .qr-box img { width: 100%; height: 100%; }
+
+        #escanner-bloqueado { text-align: center; padding: 40px 10px; color: var(--text-muted); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @media (max-width: 600px) { 
+            .participant { flex-direction: column; align-items: flex-start; gap: 12px; } 
+            .participant-actions { width: 100%; justify-content: space-between; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <img src="https://raw.githubusercontent.com/federaciondelgolfo/federaciondelgolfo.github.io/main/1000266768.png" alt="Imparables" class="event-logo">
+            <img src="https://raw.githubusercontent.com/federaciondelgolfo/federaciondelgolfo.github.io/main/1000266768.png" alt="Imparables - Federación del Golfo" class="event-logo" onerror="this.src='1000266768.png'">
             <h1>🚍 Viaje Seguro - Federación del Golfo</h1>
         </header>
 
@@ -68,203 +279,321 @@
             <div class="tab" onclick="showTab(2)" id="nav-tab2">Lista</div>
         </div>
 
-        <!-- TAB REGISTRO -->
+        <div id="loading">⌛ Conectando con la nube... Por favor espera.</div>
+
+        <!-- REGISTRO -->
         <div id="tab0" class="card" style="display: block;">
+            <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="NOMBRE COMPLETO" oninput="this.value = this.value.toUpperCase()">
             <input type="tel" id="telefono" placeholder="TELÉFONO" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <input type="text" id="distrito" placeholder="DISTRITO" oninput="this.value = this.value.toUpperCase()">
-            <button onclick="registrar()" class="success">Registrar Asistente</button>
+            <!-- BOTÓN ACTUALIZADO AQUÍ -->
+            <button onclick="registrar()" class="success" id="btn-registrar">Registrar y Descargar QR</button>
             
-            <div id="qr-container" style="display:none; text-align:center; margin-top:25px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 14px;">
-                <div style="background: white; padding: 12px; display: inline-block; border-radius: 8px;">
-                    <img id="qr-ticket" src="" alt="QR">
+            <div id="qr-container">
+                <div class="qr-box">
+                    <img id="qr-ticket" src="" alt="Código QR de Acceso">
                 </div>
-                <button onclick="descargarQR()" class="download">📥 Descargar Ticket QR</button>
+                <button onclick="descargarQR()" class="download" id="btn-descargar">📥 Descargar QR</button>
             </div>
         </div>
 
-        <!-- TAB SCANNER -->
+        <!-- CHECK-IN POR CÁMARA -->
         <div id="tab1" class="card">
-            <div id="qr-resultado-exito" style="font-weight:bold; color:var(--success-color); text-align:center; margin-bottom:15px; font-size:16px;"></div>
-            <div id="reader" style="width: 100%; max-width: 340px; margin: auto; border-radius: 12px; overflow: hidden;"></div>
-            <button onclick="iniciarEscaneo()" class="primary" style="margin-top:20px;">Activar Cámara Trasera</button>
+            <h2>Escáner de Boletos</h2>
+            
+            <div id="escanner-contenido" style="display: none;">
+                <div id="qr-resultado-exito"></div>
+                <div id="reader"></div>
+                <input type="text" id="codigo" placeholder="O TECLEA EL CÓDIGO MANUAL" maxlength="4" style="text-align: center; font-weight: bold; margin-top:20px;">
+                <button onclick="hacerCheckinManual()" class="primary" id="btn-checkin">Check-in Manual</button>
+            </div>
+
+            <div id="escanner-bloqueado">
+                <p>🔒 Esta pestaña está habilitada solo para el administrador.</p>
+                <button onclick="autenticarAdministrador()" class="primary">Desbloquear</button>
+            </div>
         </div>
 
-        <!-- TAB LISTA -->
+        <!-- LISTA -->
         <div id="tab2" class="card">
-            <div id="auth-box">
-                <input type="password" id="pass" placeholder="Contraseña de administrador">
-                <button onclick="verLista()" class="primary">Ver Lista</button>
-            </div>
+            <h2>Lista de Participantes</h2>
+            <input type="password" id="pass" placeholder="Contraseña de acceso">
+            <button onclick="verLista()" class="primary">Ver Lista</button>
             
-            <div id="lista_admin_content" style="display:none;">
-                <!-- Métricas en tiempo real -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div>Registrados</div>
-                        <div id="stat-total">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div>Abordo (Hoy)</div>
-                        <div id="stat-checks">0</div>
-                    </div>
-                </div>
-                
-                <!-- Buscador en tiempo real -->
-                <input type="text" id="buscador-lista" placeholder="🔍 Buscar por nombre, distrito o celular..." oninput="filtrarLista()">
-                <div id="lista_container" style="margin-top:10px;"></div>
+            <div id="lista_container" style="margin-top:20px; display: none;">
+                <div id="distritos_tabs" class="distritos-tabs-container"></div>
+                <div id="distritos_paneles"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyAswPuSrqT_X6Dgp5YKrensweVwTY16EE", databaseURL: "https://viaje-federacion-default-rtdb.firebaseio.com/" };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAswPuSrqT_X6Dgp5YKrensweVwTY16EE",
+            authDomain: "viaje-federacion.firebaseapp.com",
+            databaseURL: "https://viaje-federacion-default-rtdb.firebaseio.com/",
+            projectId: "viaje-federacion",
+            storageBucket: "viaje-federacion.appspot.com",
+            messagingSenderId: "367004191433",
+            appId: "1:367004191433:web:9ec4c3455e8a2f1dc68bdc"
+        };
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        
         let html5QrcodeScanner = null;
-        let nombreParaArchivoQR = "ticket";
-        let listadoAsistentesCache = []; // Almacenamiento local temporal para el buscador rápido
+        let nombreUltimoRegistro = "boleto";
+        let isAdminAuthenticated = false;
 
         function showTab(n) {
-            document.querySelectorAll('.card').forEach((c, i) => c.style.display = (i === n) ? 'block' : 'none');
-            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
+            const cards = document.querySelectorAll('.card');
+            const tabs = document.querySelectorAll('.tab');
+            cards.forEach((c, i) => c.style.display = (i === n) ? 'block' : 'none');
+            tabs.forEach((t, i) => t.classList.toggle('active', i === n));
             
-            if (n !== 1 && html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then(() => { html5QrcodeScanner = null; }).catch(err => console.log(err));
-                document.getElementById('qr-resultado-exito').innerText = "";
+            if (n === 1 && isAdminAuthenticated) {
+                encenderEscaner();
+            } else {
+                apagarEscaner();
             }
+        }
+
+        function autenticarAdministrador() {
+            const intentoPass = prompt("🔑 Ingresa la contraseña:");
+            if (intentoPass === "federacion2026") {
+                isAdminAuthenticated = true;
+                document.getElementById('escanner-bloqueado').style.display = 'none';
+                document.getElementById('escanner-contenido').style.display = 'block';
+                encenderEscaner();
+            } else if (intentoPass !== null) {
+                alert("❌ Contraseña incorrecta.");
+            }
+        }
+
+        function toggleLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('btn-registrar').disabled = show;
         }
 
         function registrar() {
-            const nombre = document.getElementById('nombre').value.trim();
+            const nombre = document.getElementById('nombre').value.trim().toUpperCase();
             const telefono = document.getElementById('telefono').value.trim();
-            const distrito = document.getElementById('distrito').value.trim();
+            const distrito = document.getElementById('distrito').value.trim().toUpperCase();
 
             if (!nombre || !telefono || !distrito) {
-                return alert("⚠️ Por favor rellena todos los campos.");
-            }
-
-            const codigo = String(Math.floor(1000 + Math.random() * 9000));
-            nombreParaArchivoQR = nombre.replace(/\s+/g, '_');
-
-            db.ref('asistentes/' + codigo).set({ nombre, telefono, distrito, codigo, checkins: {} }).then(() => {
-                document.getElementById('qr-ticket').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${codigo}`;
-                document.getElementById('qr-container').style.display = 'block';
-                
-                document.getElementById('nombre').value = "";
-                document.getElementById('telefono').value = "";
-                document.getElementById('distrito').value = "";
-                alert(`✅ ${nombre} registrado con éxito.`);
-            }).catch(err => alert("Error en base de datos: " + err));
-        }
-
-        function descargarQR() {
-            const url = document.getElementById('qr-ticket').src;
-            fetch(url).then(response => response.blob()).then(blob => {
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `QR_${nombreParaArchivoQR}.png`;
-                link.click();
-            }).catch(() => alert("No se pudo descargar. Intentelo de nuevo."));
-        }
-
-        function iniciarEscaneo() {
-            if (html5QrcodeScanner) return;
-            
-            document.getElementById('qr-resultado-exito').innerText = "Iniciando captura de video...";
-            html5QrcodeScanner = new Html5Qrcode("reader");
-            
-            html5QrcodeScanner.start(
-                { facingMode: "environment" }, 
-                { fps: 10, qrbox: { width: 220, height: 220 } },
-                (codigoScaneado) => {
-                    const cleanCode = codigoScaneado.trim();
-                    db.ref('asistentes/' + cleanCode).once('value', (snap) => {
-                        if (!snap.exists()) {
-                            document.getElementById('qr-resultado-exito').innerHTML = "<span style='color:var(--secondary-accent)'>❌ Código inválido.</span>";
-                            return;
-                        }
-                        
-                        const p = snap.val();
-                        const hoy = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
-                        const ahora = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-                        
-                        let records = p.checkins || {};
-                        records[hoy] = ahora;
-                        
-                        db.ref('asistentes/' + cleanCode + '/checkins').set(records).then(() => {
-                            document.getElementById('qr-resultado-exito').innerHTML = `🎉 CHECK-IN OK: <br> ${p.nombre} (${ahora})`;
-                            if (navigator.vibrate) navigator.vibrate(150);
-                        });
-                    });
-                },
-                () => {}
-            ).catch(err => {
-                document.getElementById('qr-resultado-exito').innerText = "⚠️ Error de permisos de cámara.";
-                html5QrcodeScanner = null;
-            });
-        }
-
-        function verLista() {
-            if (document.getElementById('pass').value !== "federacion2026") return alert("Contraseña incorrecta");
-            
-            document.getElementById('auth-box').style.display = 'none';
-            document.getElementById('lista_admin_content').style.display = 'block';
-            
-            // Escucha activa de cambios en tiempo real
-            db.ref('asistentes').on('value', (snap) => {
-                listadoAsistentesCache = [];
-                let totalRegistrados = 0;
-                let totalAbordoHoy = 0;
-                const hoy = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
-
-                snap.forEach(s => {
-                    const p = s.val();
-                    listadoAsistentesCache.push(p);
-                    totalRegistrados++;
-                    
-                    if (p.checkins && p.checkins[hoy]) {
-                        totalAbordoHoy++;
-                    }
-                });
-
-                document.getElementById('stat-total').innerText = totalRegistrados;
-                document.getElementById('stat-checks').innerText = totalAbordoHoy;
-                
-                renderizarListaFiltrada(listadoAsistentesCache);
-            });
-        }
-
-        function renderizarListaFiltrada(lista) {
-            let html = "";
-            if (lista.length === 0) {
-                document.getElementById('lista_container').innerHTML = "<p style='color:var(--text-muted); text-align:center;'>Sin resultados encontrados</p>";
+                alert("⚠️ Por favor, rellena todos los campos.");
                 return;
             }
 
-            lista.forEach(p => {
-                const checks = p.checkins || {};
-                let logs = Object.entries(checks).map(([fecha, hora]) => `<span style="display:block; margin: 3px 0;">📅 ${fecha} — ⏰ ${hora}</span>`).join('');
-                
-                html += `
-                    <div class="participant">
-                        <strong>${p.nombre}</strong>
-                        <div class="participant-meta">Distrito: ${p.distrito || 'S/D'} | Tel: ${p.telefono || 'S/T'}</div>
-                        <div class="participant-times">${logs || '❌ Sin asistencias asentadas.'}</div>
-                    </div>`;
+            const codigo = String(Math.floor(1000 + Math.random() * 9000));
+            toggleLoading(true);
+
+            db.ref('asistentes/' + codigo).set({
+                nombre: nombre,
+                distrito: distrito,
+                telefono: telefono,
+                codigo: codigo,
+                checkins: {},
+                fechaRegistro: new Date().toLocaleString('es-MX')
+            }, (error) => {
+                toggleLoading(false);
+                if (error) {
+                    alert("Error en Firebase: " + error.message);
+                } else {
+                    nombreUltimoRegistro = nombre.replace(/\s+/g, '_');
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${codigo}`;
+                    document.getElementById('qr-ticket').src = qrUrl;
+                    document.getElementById('qr-container').style.display = 'flex';
+                    
+                    alert(`✅ ¡Registro exitoso para ${nombre}!`);
+                    
+                    document.getElementById('nombre').value = '';
+                    document.getElementById('telefono').value = '';
+                    document.getElementById('distrito').value = '';
+                }
             });
-            document.getElementById('lista_container').innerHTML = html;
         }
 
-        function filtrarLista() {
-            const query = document.getElementById('buscador-lista').value.toLowerCase().trim();
-            const filtrados = listadoAsistentesCache.filter(p => {
-                return (p.nombre && p.nombre.toLowerCase().includes(query)) ||
-                       (p.distrito && p.distrito.toLowerCase().includes(query)) ||
-                       (p.telefono && p.telefono.includes(query));
+        function descargarQR() {
+            const imgElement = document.getElementById('qr-ticket');
+            if (!imgElement.src) return;
+
+            fetch(imgElement.src)
+                .then(response => response.blob())
+                .then(blob => {
+                    const blobUrl = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = `QR_${nombreUltimoRegistro}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(blobUrl);
+                })
+                .catch(err => {
+                    window.open(imgElement.src, '_blank');
+                });
+        }
+
+        function encenderEscaner() {
+            if (html5QrcodeScanner) return;
+
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (codigoDetectado) => {
+                    procesarCheckinAutomatico(codigoDetectado.trim());
+                },
+                (error) => {}
+            ).catch(err => {
+                console.error("Error de cámara: ", err);
             });
-            renderizarListaFiltrada(filtrados);
+        }
+
+        function apagarEscaner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    html5QrcodeScanner = null;
+                    document.getElementById('reader').innerHTML = "";
+                }).catch(err => console.log(err));
+            }
+        }
+
+        function procesarCheckinAutomatico(codigoInput) {
+            if (!codigoInput) return;
+
+            db.ref('asistentes/' + codigoInput).once('value', (snapshot) => {
+                if (!snapshot.exists()) {
+                    document.getElementById('qr-resultado-exito').innerHTML = "❌ Código QR Inválido";
+                    document.getElementById('qr-resultado-exito').style.color = "var(--error-color)";
+                    return;
+                }
+
+                const persona = snapshot.val();
+                const fechaActual = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
+                const horaActual = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+
+                let historialCheckins = persona.checkins || {}; 
+                
+                if (historialCheckins[fechaActual]) {
+                    document.getElementById('qr-resultado-exito').innerHTML = `ℹ️ Ya tiene check-in hoy: ${historialCheckins[fechaActual]}`;
+                    document.getElementById('qr-resultado-exito').style.color = "var(--primary-accent)";
+                } else {
+                    historialCheckins[fechaActual] = horaActual;
+
+                    db.ref('asistentes/' + codigoInput).update({
+                        checkins: historialCheckins
+                    }).then(() => {
+                        document.getElementById('qr-resultado-exito').innerHTML = `🎉 ✅ ¡BIENVENIDO, ${persona.nombre}!`;
+                        document.getElementById('qr-resultado-exito').style.color = "var(--success-color)";
+                        try { navigator.vibrate(200); } catch(e){}
+                    });
+                }
+            });
+        }
+
+        function hacerCheckinManual() {
+            const cod = document.getElementById('codigo').value.trim();
+            if(!cod) return alert("Escribe un código");
+            procesarCheckinAutomatico(cod);
+            document.getElementById('codigo').value = '';
+        }
+
+        function verLista() {
+            const pass = document.getElementById('pass').value;
+            if (pass !== "federacion2026") {
+                alert("❌ Contraseña incorrecta.");
+                document.getElementById('lista_container').style.display = 'none';
+                return;
+            }
+
+            isAdminAuthenticated = true;
+            document.getElementById('escanner-bloqueado').style.display = 'none';
+            document.getElementById('escanner-contenido').style.display = 'block';
+
+            toggleLoading(true);
+
+            db.ref('asistentes').once('value', (snapshot) => {
+                toggleLoading(false);
+                const tabsContainer = document.getElementById('distritos_tabs');
+                const panelesContainer = document.getElementById('distritos_paneles');
+                document.getElementById('lista_container').style.display = 'block';
+
+                if (!snapshot.exists()) {
+                    tabsContainer.innerHTML = "";
+                    panelesContainer.innerHTML = "<p style='text-align:center;color:var(--text-muted);'>No hay registros.</p>";
+                    return;
+                }
+
+                const porDistrito = {};
+                snapshot.forEach((childSnapshot) => {
+                    const p = childSnapshot.val();
+                    const distName = p.distrito || "SIN DISTRITO";
+                    if (!porDistrito[distName]) porDistrito[distName] = [];
+                    porDistrito[distName].push(p);
+                });
+
+                const distritosOrdenados = Object.keys(porDistrito).sort();
+                let tabsHtml = "";
+                let panelesHtml = "";
+
+                distritosOrdenados.forEach((dist, index) => {
+                    const isActive = index === 0 ? 'active' : '';
+                    tabsHtml += `<div class="distrito-tab ${isActive}" onclick="showDistritoTab('${dist}')" id="tab-link-${dist}">${dist} (${porDistrito[dist].length})</div>`;
+                    
+                    panelesHtml += `<div class="distrito-panel ${isActive}" id="panel-dist-${dist}">`;
+                    porDistrito[dist].forEach(p => {
+                        const historial = p.checkins || {};
+                        const diasRegistrados = Object.keys(historial);
+                        const totalDias = diasRegistrados.length;
+                        
+                        let detalleFechas = "";
+                        diasRegistrados.forEach(f => {
+                            detalleFechas += `📅 ${f} `;
+                        });
+
+                        panelesHtml += `
+                            <div class="participant ${totalDias > 0 ? 'verde' : 'rojo'}" id="row-${p.codigo}">
+                                <div class="participant-info">
+                                    <strong>${p.nombre || 'Desconocido'}</strong>
+                                    <div class="participant-info-sub">Tel: ${p.telefono} | Cód: ${p.codigo}</div>
+                                    <div style="font-size: 11px; margin-top: 5px; color: var(--primary-accent);">${detalleFechas}</div>
+                                </div>
+                                <div class="participant-actions">
+                                    <div class="status">
+                                        ${totalDias > 0 ? `✅ ${totalDias}/2 DÍAS` : '❌ PENDIENTE'}
+                                    </div>
+                                    <button class="btn-delete" onclick="eliminarRegistro('${p.codigo}', '${p.nombre}')">🗑️</button>
+                                </div>
+                            </div>`;
+                    });
+                    panelesHtml += `</div>`;
+                });
+
+                tabsContainer.innerHTML = tabsHtml;
+                panelesContainer.innerHTML = panelesHtml;
+            });
+        }
+
+        function eliminarRegistro(codigo, nombre) {
+            if (!confirm(`⚠️ ¿Eliminar a "${nombre}"?`)) return;
+            toggleLoading(true);
+            db.ref('asistentes/' + codigo).remove().then(() => {
+                toggleLoading(false);
+                verLista();
+            });
+        }
+
+        function showDistritoTab(distritoSeleccionado) {
+            document.querySelectorAll('.distrito-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.distrito-tab').forEach(tab => tab.classList.remove('active'));
+            if(document.getElementById(`panel-dist-${distritoSeleccionado}`)){
+                document.getElementById(`panel-dist-${distritoSeleccionado}`).classList.add('active');
+            }
+            if(document.getElementById(`tab-link-${distritoSeleccionado}`)){
+                document.getElementById(`tab-link-${distritoSeleccionado}`).classList.add('active');
+            }
         }
     </script>
 </body>
