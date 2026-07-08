@@ -388,9 +388,9 @@
         .distrito-panel.active { display: block; animation: fadeIn 0.3s ease; }
 
         .participant { 
-            padding: 18px; 
+            padding: 16px; 
             background-color: rgba(0, 0, 0, 0.2); 
-            margin: 12px 0; 
+            margin: 10px 0; 
             border-radius: 14px; 
             display: flex; 
             justify-content: space-between; 
@@ -398,11 +398,12 @@
             border: 1px solid rgba(255,255,255,0.03); 
             transition: opacity 0.2s, transform 0.2s;
         }
-        .participant-actions { display: flex; align-items: center; gap: 8px; }
-        .participant strong { font-size: 16px; color: var(--text-main); letter-spacing: 0.3px; }
-        .participant-info-sub { font-size: 13px; color: var(--text-muted); margin-top: 5px; }
+        .participant-info { flex: 1; min-width: 0; }
+        .participant-actions { display: flex; align-items: center; gap: 8px; margin-left: 15px; }
+        .participant strong { font-size: 15px; color: var(--text-main); letter-spacing: 0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .participant-info-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
         
-        .status { padding: 8px 14px; border-radius: 30px; font-weight: 800; font-size: 11px; letter-spacing: 0.5px; white-space: nowrap; }
+        .status { padding: 6px 12px; border-radius: 30px; font-weight: 800; font-size: 10px; letter-spacing: 0.5px; white-space: nowrap; text-align: center; min-width: 75px; }
         .verde .status { background-color: rgba(0, 184, 148, 0.15); color: var(--success-color); border: 1px solid rgba(0, 184, 148, 0.2); }
         .rojo .status { background-color: rgba(255, 118, 117, 0.15); color: var(--error-color); border: 1px solid rgba(255, 118, 117, 0.2); }
         .amarillo .status { background-color: rgba(245, 166, 35, 0.15); color: var(--primary-accent); border: 1px solid rgba(245, 166, 35, 0.2); }
@@ -411,10 +412,10 @@
             background: rgba(255, 118, 117, 0.1);
             color: var(--error-color);
             border: 1px solid rgba(255, 118, 117, 0.15);
-            padding: 8px 12px;
+            padding: 8px 10px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             margin: 0;
             width: auto;
             transition: all 0.2s;
@@ -425,10 +426,10 @@
             background: rgba(9, 132, 227, 0.1);
             color: var(--info-color);
             border: 1px solid rgba(9, 132, 227, 0.15);
-            padding: 8px 12px;
+            padding: 8px 10px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             margin: 0;
             width: auto;
             transition: all 0.2s;
@@ -444,30 +445,89 @@
 
         #escanner-bloqueado { text-align: center; padding: 40px 10px; color: var(--text-muted); }
 
-        .badge-checkpoint {
-            display: inline-flex;
+        /* NUEVOS ESTILOS PARA LA LÍNEA DE TIEMPO VISUAL COMPACTA (PROPUESTA 4) */
+        .timeline-tracker {
+            display: flex;
             align-items: center;
-            gap: 4px;
-            margin-right: 6px;
-            margin-top: 4px;
-            font-size: 11px;
-            background: rgba(245, 166, 35, 0.08);
-            border: 1px solid rgba(245, 166, 35, 0.15);
-            padding: 4px 8px;
-            border-radius: 8px;
-            color: #fff;
+            gap: 5px;
+            margin-top: 8px;
+            background: rgba(0,0,0,0.15);
+            padding: 6px 10px;
+            border-radius: 10px;
+            width: fit-content;
         }
-        .badge-checkpoint b {
+        
+        .tracker-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.2);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* Burbuja de ayuda emergente al pasar el cursor (Tooltip) */
+        .tracker-dot::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.8);
+            background: #000;
+            color: #fff;
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 10;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .tracker-dot:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* Estados activos individuales con iluminación propia */
+        .tracker-dot.active {
+            background-color: rgba(245, 166, 35, 0.12);
+            border-color: rgba(245, 166, 35, 0.4);
             color: var(--primary-accent);
-            font-weight: 700;
+        }
+        .tracker-dot.active.bus {
+            background-color: rgba(9, 132, 227, 0.15);
+            border-color: rgba(9, 132, 227, 0.4);
+            color: #63c2de;
+        }
+        .tracker-dot.active.hotel {
+            background-color: rgba(155, 89, 182, 0.15);
+            border-color: rgba(155, 89, 182, 0.4);
+            color: #cc99ff;
+        }
+        .tracker-dot.active.nature {
+            background-color: rgba(0, 184, 148, 0.15);
+            border-color: rgba(0, 184, 148, 0.4);
+            color: var(--success-color);
         }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @media (max-width: 600px) { 
             .tabs { padding: 8px; gap: 4px; }
             .tab { font-size: 11px; padding: 10px 4px; }
-            .participant { flex-direction: column; align-items: flex-start; gap: 12px; } 
-            .participant-actions { width: 100%; justify-content: space-between; }
+            .participant { flex-direction: column; align-items: flex-start; gap: 12px; padding: 14px; } 
+            .participant-info { width: 100%; }
+            .participant-actions { width: 100%; justify-content: space-between; margin-left: 0; }
         }
     </style>
 </head>
@@ -630,8 +690,18 @@
         let nombreUltimoRegistro = "boleto";
         let isAdminAuthenticated = false;
 
-        // Se agrega STAFF al array de validaciones internas
         const distritosValidos = ["STAFF", "ALLENDE", "BARRANCAS", "CENTRAL", "CERRITOS", "COATZA 1", "COATZA 2", "COATZA 3", "COATZA 4", "COATZA 5", "COATZA 6", "MUNDO NUEVO", "NANCHITAL 1", "NANCHITAL 2", "NANCHITAL 3"];
+
+        // Listado estricto ordenado cronológicamente para armar la barra visual
+        const puntosOrdenados = [
+            { id: "Viernes - Abordaje Mañana", short: "🌅", cat: "bus" },
+            { id: "Viernes - Abordaje Rancho Nuevo", short: "🌳", cat: "nature" },
+            { id: "Viernes - Regreso Hotel Noche", short: "🏨", cat: "hotel" },
+            { id: "Sábado - Regreso Hotel Noche", short: "🛌", cat: "hotel" },
+            { id: "Domingo - Abordaje Hotel", short: "🚍", cat: "bus" },
+            { id: "Domingo - Abordaje Cañón", short: "⛰️", cat: "nature" },
+            { id: "Domingo - Abordaje Plaza", short: "🛒", cat: "bus" }
+        ];
 
         function showTab(n) {
             const cards = document.querySelectorAll('.card');
@@ -926,22 +996,22 @@
                     panelesHtml += `<div class="distrito-panel ${classActive}" id="panel-dist-${dist}" style="display: ${displayStyle};">`;
                     porDistrito[dist].forEach(p => {
                         const historial = p.checkins || {};
-                        const puntosListados = Object.keys(historial);
-                        const totalPuntosPersona = puntosListados.length;
+                        const totalPuntosPersona = Object.keys(historial).length;
                         
-                        let detallePuntos = "";
-                        puntosListados.sort().forEach(punto => {
-                            let icono = "📍";
-                            if(punto.includes("Abordaje") || punto.includes("Mañana")) icono = "🚍";
-                            if(punto.includes("Hotel") || punto.includes("Noche")) icono = "🏨";
-                            if(punto.includes("Cañón")) icono = "⛰️";
-                            if(punto.includes("Plaza")) icono = "🛒";
-                            
-                            detallePuntos += `
-                                <span class="badge-checkpoint">
-                                    ${icono} ${punto}: <b>${historial[punto]}</b>
-                                </span>`;
+                        // IMPLEMENTACIÓN DE LA PROPUESTA 4: MATRIZ DE BURBUJAS COMPACTAS
+                        let htmlMatrizPuntos = `<div class="timeline-tracker">`;
+                        puntosOrdenados.forEach(puntoInfo => {
+                            const completado = historial[puntoInfo.id] !== undefined;
+                            const horaRegistrada = completado ? historial[puntoInfo.id] : "Sin registro";
+                            const claseActivo = completado ? `active ${puntoInfo.cat}` : '';
+                            const textoTooltip = `${puntoInfo.id}: ${horaRegistrada}`;
+
+                            htmlMatrizPuntos += `
+                                <div class="tracker-dot ${claseActivo}" data-tooltip="${textoTooltip}">
+                                    ${puntoInfo.short}
+                                </div>`;
                         });
+                        htmlMatrizPuntos += `</div>`;
 
                         let claseColor = "rojo";
                         if (totalPuntosPersona === 7) claseColor = "verde";
@@ -952,9 +1022,9 @@
                                 <div class="participant-info">
                                     <strong>${p.nombre || 'Desconocido'}</strong>
                                     <div class="participant-info-sub">Tel: ${p.telefono} | Cód: ${p.codigo}</div>
-                                    <div style="margin-top: 8px; line-height:1.6; display:flex; flex-wrap:wrap; gap:4px;">
-                                        ${detallePuntos || '<span style="color:var(--error-color); font-size:11px;">⚠️ Sin registros de movimiento</span>'}
-                                    </div>
+                                    
+                                    ${htmlMatrizPuntos}
+
                                 </div>
                                 <div class="participant-actions">
                                     <div class="status">
