@@ -102,10 +102,7 @@
             width: auto;
             transition: all 0.2s;
         }
-        .btn-delete:hover {
-            background: var(--error-color);
-            color: white;
-        }
+        .btn-delete:hover { background: var(--error-color); color: white; }
 
         #loading { display: none; text-align: center; color: var(--secondary-accent); font-weight: bold; margin: 10px 0; }
 
@@ -123,9 +120,9 @@
         </header>
 
         <div class="tabs">
-            <div class="tab active" onclick="showTab(0)">Registro</div>
-            <div class="tab" onclick="showTab(1)">Check-in</div>
-            <div class="tab" onclick="showTab(2)">Lista</div>
+            <div class="tab active" onclick="showTab(0)" id="nav-tab0">Registro</div>
+            <div class="tab" onclick="showTab(1)" id="nav-tab1">Check-in</div>
+            <div class="tab" onclick="showTab(2)" id="nav-tab2">Lista</div>
         </div>
 
         <div id="loading">⌛ Procesando con la nube... Por favor espera.</div>
@@ -157,7 +154,6 @@
     </div>
 
     <script>
-        // Enlace real de tu base de datos en Google Sheets
         const SHEETDB_URL = "https://sheetdb.io/api/v1/rzteb55quxnmt";
 
         function showTab(n) {
@@ -178,7 +174,6 @@
             const telefono = document.getElementById('telefono').value.trim();
             const distrito = document.getElementById('distrito').value.trim().toUpperCase();
 
-            // Nueva validación estricta de campos obligatorios
             if (!nombre || !telefono || !distrito) {
                 alert("⚠️ Por favor, rellena todos los campos. El teléfono ahora es obligatorio.");
                 return;
@@ -244,7 +239,7 @@
                     document.getElementById('codigo').value = '';
                 } else {
                     const ahora = new Date();
-                    const horaLimpia = ahora.toLocaleDateString('es-MX') + ' ' + algo || ahora.toLocaleTimeString('es-MX');
+                    const horaLimpia = ahora.toLocaleDateString('es-MX') + ' ' + ahora.toLocaleTimeString('es-MX');
 
                     fetch(`${SHEETDB_URL}/codigo/${codigoInput}`, {
                         method: 'PATCH',
@@ -261,6 +256,11 @@
                         toggleLoading(false);
                         alert(`🎉 ✅ Check-in completado para ${persona.nombre} a las ${ahora.toLocaleTimeString('es-MX')}`);
                         document.getElementById('codigo').value = '';
+                        
+                        // Si entró por link QR, limpiamos la URL limpia para el siguiente uso
+                        if(window.location.search) {
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                        }
                     });
                 }
             })
@@ -339,9 +339,8 @@
             });
         }
 
-        // Nueva función para borrar registros directo de Google Sheets usando el código único
         function eliminarRegistro(codigo, nombre) {
-            const confirmar = confirm(`⚠️ ¿Estás seguro de que deseas eliminar permanentemente a "${nombre}" de la lista y del Excel?`);
+            const confirmar = confirm(`⚠️ ¿Estás seguro de que deseas eliminar permanentemente a "${nombre}"?`);
             if (!confirmar) return;
 
             toggleLoading(true);
@@ -353,8 +352,7 @@
             .then(res => res.json())
             .then(response => {
                 toggleLoading(false);
-                alert(`🗑️ Registro de "${nombre}" eliminado correctamente.`);
-                // Recargar la lista visual para actualizar los distritos y los contadores
+                alert(`🗑️ Registro de "${nombre}" eliminado.`);
                 verLista();
             })
             .catch(err => {
@@ -369,6 +367,19 @@
             document.getElementById(`panel-dist-${distritoSeleccionado}`).classList.add('active');
             document.getElementById(`tab-link-${distritoSeleccionado}`).classList.add('active');
         }
+
+        // FUNCIÓN NUEVA: Detectar si el usuario escaneó el QR general
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const codigoUrl = urlParams.get('code');
+
+            if (codigoUrl) {
+                // Ir a la pestaña de Check-In
+                showTab(1);
+                // Colocar el código automáticamente
+                document.getElementById('codigo').value = codigoUrl;
+            }
+        });
     </script>
 </body>
 </html>
