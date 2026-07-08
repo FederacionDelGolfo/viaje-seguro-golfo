@@ -53,152 +53,46 @@
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
+        header h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
 
-        .tabs {
-            display: flex;
-            gap: 5px;
-            padding: 15px;
-            background-color: rgba(255,255,255,0.02);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
+        .tabs { display: flex; gap: 5px; padding: 15px; background-color: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-muted); border-radius: var(--radius-tab); transition: all 0.2s ease; }
+        .tab:hover { background-color: rgba(255,255,255,0.05); color: var(--text-main); }
+        .tab.active { background-color: var(--primary-accent); color: white; box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3); }
 
-        .tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 15px;
-            color: var(--text-muted);
-            border-radius: var(--radius-tab);
-            transition: all 0.2s ease;
-        }
+        .card { padding: 35px 30px; display: none; }
+        h2 { margin-top: 0; margin-bottom: 25px; font-size: 22px; font-weight: 600; color: var(--text-main); }
 
-        .tab:hover {
-            background-color: rgba(255,255,255,0.05);
-            color: var(--text-main);
-        }
+        input { padding: 16px; margin: 10px 0; width: 100%; border-radius: 10px; font-size: 16px; box-sizing: border-box; background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); transition: border-color 0.2s; }
+        input:focus { outline: none; border-color: var(--primary-accent); box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2); }
 
-        .tab.active {
-            background-color: var(--primary-accent);
-            color: white;
-            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
-        }
-
-        .card {
-            padding: 35px 30px;
-            display: none; 
-        }
-
-        h2 {
-            margin-top: 0;
-            margin-bottom: 25px;
-            font-size: 22px;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-        input {
-            padding: 16px;
-            margin: 10px 0;
-            width: 100%;
-            border-radius: 10px;
-            font-size: 16px;
-            box-sizing: border-box;
-            background-color: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-main);
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary-accent);
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
-        }
-
-        button {
-            padding: 16px;
-            margin: 20px 0 10px;
-            width: 100%;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
+        button { padding: 16px; margin: 20px 0 10px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
         button.primary { background-color: var(--primary-accent); color: white; }
         button.primary:hover { background-color: #5b4bc4; }
         button.success { background-color: var(--success-color); color: white; }
         button.success:hover { background-color: #00a383; }
-        button.secondary { background-color: transparent; color: var(--primary-accent); border: 2px solid var(--primary-accent); margin-top: 15px;}
 
-        /* Sub-pestañas de Distritos */
-        .distritos-tabs-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin: 20px 0;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .distrito-tab {
-            padding: 8px 14px;
-            background-color: rgba(255,255,255,0.05);
-            color: var(--text-muted);
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .distrito-tab.active {
-            background-color: var(--secondary-accent);
-            color: #10121a;
-            font-weight: 700;
-        }
+        .distritos-tabs-container { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .distrito-tab { padding: 8px 14px; background-color: rgba(255,255,255,0.05); color: var(--text-muted); border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .distrito-tab.active { background-color: var(--secondary-accent); color: #10121a; font-weight: 700; }
 
         .distrito-panel { display: none; }
         .distrito-panel.active { display: block; animation: fadeIn 0.3s ease; }
 
-        .participant {
-            padding: 18px;
-            background-color: rgba(255,255,255,0.03);
-            margin: 12px 0;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255,255,255,0.03);
-        }
-
+        .participant { padding: 18px; background-color: rgba(255,255,255,0.03); margin: 12px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.03); }
         .participant strong { font-size: 16px; color: var(--text-main); }
         .participant-info-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
         .status { padding: 8px 14px; border-radius: 30px; font-weight: 700; font-size: 12px; }
         
         .verde .status { background-color: rgba(0, 184, 148, 0.15); color: var(--success-color); }
         .rojo .status { background-color: rgba(255, 118, 117, 0.15); color: var(--error-color); }
-
         .time-badge { font-size: 11px; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #fff;}
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #loading { display: none; text-align: center; color: var(--secondary-accent); font-weight: bold; margin: 10px 0; }
 
-        @media (max-width: 600px) {
-            .participant { flex-direction: column; align-items: flex-start; gap: 12px; }
-            .status { align-self: flex-end; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @media (max-width: 600px) { .participant { flex-direction: column; align-items: flex-start; gap: 12px; } .status { align-self: flex-end; } }
     </style>
 </head>
 <body>
@@ -213,18 +107,20 @@
             <div class="tab" onclick="showTab(2)">Lista</div>
         </div>
 
-        <div id="tab0" class="card">
+        <div id="loading">⌛ Procesando con la nube... Por favor espera.</div>
+
+        <div id="tab0" class="card" style="display: block;">
             <h2>Registro de Asistente</h2>
             <input type="text" id="nombre" placeholder="NOMBRE COMPLETO" oninput="this.value = this.value.toUpperCase()">
             <input type="tel" id="telefono" placeholder="Teléfono (opcional)">
             <input type="text" id="distrito" placeholder="DISTRITO" oninput="this.value = this.value.toUpperCase()">
-            <button onclick="registrar()" class="success">Registrarme</button>
+            <button onclick="registrar()" class="success" id="btn-registrar">Registrarme</button>
         </div>
 
         <div id="tab1" class="card">
             <h2>Check-in de Asistencia</h2>
             <input type="text" id="codigo" placeholder="CÓDIGO" maxlength="4" style="text-align: center; letter-spacing: 5px; font-weight: bold; font-size: 20px;">
-            <button onclick="hacerCheckin()" class="primary">Confirmar Mi Asistencia</button>
+            <button onclick="hacerCheckin()" class="primary" id="btn-checkin">Confirmar Mi Asistencia</button>
         </div>
 
         <div id="tab2" class="card">
@@ -235,20 +131,25 @@
             <div id="lista_container" style="margin-top:20px; display: none;">
                 <div id="distritos_tabs" class="distritos-tabs-container"></div>
                 <div id="distritos_paneles"></div>
-                
-                <button onclick="exportar()" class="secondary">Exportar a CSV (Excel)</button>
             </div>
         </div>
     </div>
 
     <script>
-        let data = JSON.parse(localStorage.getItem('viajeFG')) || [];
+        // Enlace real de tu base de datos en Google Sheets
+        const SHEETDB_URL = "https://sheetdb.io/api/v1/rzteb55quxnmt";
 
         function showTab(n) {
             const cards = document.querySelectorAll('.card');
             const tabs = document.querySelectorAll('.tab');
             cards.forEach((c, i) => c.style.display = (i === n) ? 'block' : 'none');
             tabs.forEach((t, i) => t.classList.toggle('active', i === n));
+        }
+
+        function toggleLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('btn-registrar').disabled = show;
+            document.getElementById('btn-checkin').disabled = show;
         }
 
         function registrar() {
@@ -261,45 +162,85 @@
                 return;
             }
 
-            const codigo = Math.floor(1000 + Math.random() * 9000);
+            const codigo = String(Math.floor(1000 + Math.random() * 9000));
+            toggleLoading(true);
 
-            data.push({
-                nombre, 
-                telefono: telefono || "-", 
-                distrito, 
-                codigo, 
-                checkin: false, 
-                checkinFecha: null, 
-                fechaRegistro: new Date().toLocaleString('es-MX')
+            fetch(SHEETDB_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    data: [{
+                        nombre,
+                        distrito,
+                        telefono: telefono || "-",
+                        codigo,
+                        checkin: "No",
+                        checkinFecha: "",
+                        fechaRegistro: new Date().toLocaleString('es-MX')
+                    }]
+                })
+            })
+            .then(res => res.json())
+            .then(response => {
+                toggleLoading(false);
+                alert(`✅ ¡Registro exitoso, ${nombre}!\nTu código asignado es: ${codigo}`);
+                document.getElementById('nombre').value = '';
+                document.getElementById('telefono').value = '';
+                document.getElementById('distrito').value = '';
+            })
+            .catch(err => {
+                toggleLoading(false);
+                alert("Error al conectar con el Excel: " + err);
             });
-            localStorage.setItem('viajeFG', JSON.stringify(data));
-
-            alert(`✅ ¡Registro exitoso!\nCódigo asignado: ${codigo}`);
-            
-            document.getElementById('nombre').value = '';
-            document.getElementById('telefono').value = '';
-            document.getElementById('distrito').value = '';
         }
 
         function hacerCheckin() {
             const codigoInput = document.getElementById('codigo').value.trim();
-            const persona = data.find(p => p.codigo == codigoInput);
+            if (!codigoInput) return alert("Ingresa un código.");
 
-            if (persona) {
-                if (persona.checkin) {
+            toggleLoading(true);
+
+            fetch(`${SHEETDB_URL}/search?codigo=${codigoInput}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.length === 0) {
+                    toggleLoading(false);
+                    alert("❌ Código incorrecto. Verifica el número.");
+                    return;
+                }
+
+                const persona = data[0];
+
+                if (persona.checkin === "Si") {
+                    toggleLoading(false);
                     alert(`ℹ️ ${persona.nombre} ya realizó el check-in.`);
+                    document.getElementById('codigo').value = '';
                 } else {
                     const ahora = new Date();
-                    persona.checkin = true;
-                    // Guardamos la fecha y hora legible de manera explícita
-                    persona.checkinFecha = ahora.toLocaleDateString('es-MX') + ' ' + ahora.toLocaleTimeString('es-MX');
-                    localStorage.setItem('viajeFG', JSON.stringify(data));
-                    alert(`🎉 ✅ Check-in completado a las ${ahora.toLocaleTimeString('es-MX')} para ${persona.nombre}`);
+                    const horaLimpia = ahora.toLocaleDateString('es-MX') + ' ' + ahora.toLocaleTimeString('es-MX');
+
+                    fetch(`${SHEETDB_URL}/codigo/${codigoInput}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            data: {
+                                checkin: "Si",
+                                checkinFecha: horaLimpia
+                            }
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(updateRes => {
+                        toggleLoading(false);
+                        alert(`🎉 ✅ Check-in completado para ${persona.nombre} a las ${ahora.toLocaleTimeString('es-MX')}`);
+                        document.getElementById('codigo').value = '';
+                    });
                 }
-                document.getElementById('codigo').value = '';
-            } else {
-                alert("❌ Código incorrecto.");
-            }
+            })
+            .catch(err => {
+                toggleLoading(false);
+                alert("Error al hacer check-in: " + err);
+            });
         }
 
         function verLista() {
@@ -310,92 +251,70 @@
                 return;
             }
 
-            const tabsContainer = document.getElementById('distritos_tabs');
-            const panelesContainer = document.getElementById('distritos_paneles');
-            document.getElementById('lista_container').style.display = 'block';
+            toggleLoading(true);
 
-            if (data.length === 0) {
-                tabsContainer.innerHTML = "";
-                panelesContainer.innerHTML = "<p>No hay registros todavía.</p>";
-                return;
-            }
+            fetch(SHEETDB_URL)
+            .then(res => res.json())
+            .then(listaAsistentes => {
+                toggleLoading(false);
+                const tabsContainer = document.getElementById('distritos_tabs');
+                const panelesContainer = document.getElementById('distritos_paneles');
+                document.getElementById('lista_container').style.display = 'block';
 
-            // Agrupar por distrito
-            const porDistrito = {};
-            data.forEach(p => {
-                if (!porDistrito[p.distrito]) porDistrito[p.distrito] = [];
-                porDistrito[p.distrito].push(p);
-            });
+                if (listaAsistentes.length === 0) {
+                    tabsContainer.innerHTML = "";
+                    panelesContainer.innerHTML = "<p>No hay registros en el Excel todavía.</p>";
+                    return;
+                }
 
-            const distritosOrdenados = Object.keys(porDistrito).sort();
-            
-            let tabsHtml = "";
-            let panelesHtml = "";
-
-            distritosOrdenados.forEach((dist, index) => {
-                const isActive = index === 0 ? 'active' : '';
-                
-                // 1. Crear Pestaña del Distrito
-                tabsHtml += `<div class="distrito-tab ${isActive}" onclick="showDistritoTab('${dist}')" id="tab-link-${dist}">${dist} (${porDistrito[dist].length})</div>`;
-                
-                // 2. Crear Panel de Alumnos del Distrito
-                panelesHtml += `<div class="distrito-panel ${isActive}" id="panel-dist-${dist}">`;
-                
-                porDistrito[dist].forEach(p => {
-                    // Extraer solo la sección de la hora si ya hizo Check-in para diseño estético
-                    const horaCheckin = p.checkin ? p.checkinFecha.split(' ')[1] : '';
-
-                    panelesHtml += `
-                        <div class="participant ${p.checkin ? 'verde' : 'rojo'}">
-                            <div class="participant-info">
-                                <strong>${p.nombre}</strong>
-                                <div class="participant-info-sub">Tel: ${p.telefono} | Cód: ${p.codigo}</div>
-                            </div>
-                            <div class="status">
-                                ${p.checkin ? `✅ LISTO <span class="time-badge">${horaCheckin}</span>` : '❌ PENDIENTE'}
-                            </div>
-                        </div>`;
+                const porDistrito = {};
+                listaAsistentes.forEach(p => {
+                    if (!porDistrito[p.distrito]) porDistrito[p.distrito] = [];
+                    porDistrito[p.distrito].push(p);
                 });
-                
-                panelesHtml += `</div>`;
-            });
 
-            tabsContainer.innerHTML = tabsHtml;
-            panelesContainer.innerHTML = panelesHtml;
+                const distritosOrdenados = Object.keys(porDistrito).sort();
+                let tabsHtml = "";
+                let panelesHtml = "";
+
+                distritosOrdenados.forEach((dist, index) => {
+                    const isActive = index === 0 ? 'active' : '';
+                    tabsHtml += `<div class="distrito-tab ${isActive}" onclick="showDistritoTab('${dist}')" id="tab-link-${dist}">${dist} (${porDistrito[dist].length})</div>`;
+                    
+                    panelesHtml += `<div class="distrito-panel ${isActive}" id="panel-dist-${dist}">`;
+                    porDistrito[dist].forEach(p => {
+                        const esPresente = p.checkin === "Si";
+                        const horaCheckin = esPresente && p.checkinFecha ? p.checkinFecha.split(' ')[1] : '';
+                        
+                        panelesHtml += `
+                            <div class="participant ${esPresente ? 'verde' : 'rojo'}">
+                                <div class="participant-info">
+                                    <strong>${p.nombre}</strong>
+                                    <div class="participant-info-sub">Tel: ${p.telefono} | Cód: ${p.codigo}</div>
+                                </div>
+                                <div class="status">
+                                    ${esPresente ? `✅ LISTO <span class="time-badge">${horaCheckin}</span>` : '❌ PENDIENTE'}
+                                </div>
+                            </div>`;
+                    });
+                    panelesHtml += `</div>`;
+                });
+
+                tabsContainer.innerHTML = tabsHtml;
+                panelesContainer.innerHTML = panelesHtml;
+            })
+            .catch(err => {
+                toggleLoading(false);
+                alert("Error al cargar la lista: " + err);
+            });
         }
 
-        // Cambiar entre sub-pestañas de distritos
         function showDistritoTab(distritoSeleccionado) {
             document.querySelectorAll('.distrito-panel').forEach(panel => panel.classList.remove('active'));
             document.querySelectorAll('.distrito-tab').forEach(tab => tab.classList.remove('active'));
-
             document.getElementById(`panel-dist-${distritoSeleccionado}`).classList.add('active');
             document.getElementById(`tab-link-${distritoSeleccionado}`).classList.add('active');
         }
-
-        function exportar() {
-            if (data.length === 0) {
-                alert("No hay datos para exportar.");
-                return;
-            }
-
-            let csv = "\uFEFFNombre,Distrito,Telefono,Codigo,Checkin,Fecha_Hora_Checkin,Fecha_Registro\n";
-            data.forEach(p => {
-                csv += `"${p.nombre}","${p.distrito}","${p.telefono}","${p.codigo}","${p.checkin ? 'Si' : 'No'}","${p.checkinFecha || ''}","${p.fechaRegistro}"\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "lista_asistentes_viaje.csv");
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        showTab(0);
     </script>
 </body>
 </html>
